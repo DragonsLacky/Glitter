@@ -1,11 +1,11 @@
 // Local Headers
 #include "glitter.hpp"
-#include "../../Build/Shader.hpp"
-#include "../../Build/Camera.hpp"
-#include "../../Build/Light.hpp"
+#include "Shader.hpp"
+#include "Camera.hpp"
+#include "Light.hpp"
 //#include "../../Build/Model.hpp"
 //#include "../../Build/Cube.hpp"
-#include "../../Build/Scene.hpp"
+#include "Scene.hpp"
 
 
 // System Headers
@@ -120,11 +120,11 @@ int main()
     // build and compile our shader program
     // ------------------------------------
     // vertex shader
-    ResourceManager::LoadShader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag",nullptr, "shader");
-    ResourceManager::LoadShader("Resources/Shaders/ModelShader.vert", "Resources/Shaders/ModelShader.frag", nullptr, "model");
-    ResourceManager::LoadShader("Resources/Shaders/skyboxShader.vert", "Resources/Shaders/skyboxShader.frag", nullptr, "skybox");
-    ResourceManager::LoadShader("Resources/Shaders/ScreenShader.vert", "Resources/Shaders/ScreenShader.frag", nullptr, "screen");
-    ResourceManager::LoadShader("Resources/Shaders/Basic.vert", "Resources/Shaders/Basic.frag", nullptr ,"basic");
+    ResourceManager::LoadShader("../Glitter/Resources/Shaders/shader.vert", "../Glitter//Resources/Shaders/shader.frag",nullptr, "shader");
+    ResourceManager::LoadShader("../Glitter/Resources/Shaders/ModelShader.vert", "../Glitter/Resources/Shaders/ModelShader.frag", nullptr, "model");
+    ResourceManager::LoadShader("../Glitter/Resources/Shaders/skyboxShader.vert", "../Glitter/Resources/Shaders/skyboxShader.frag", nullptr, "skybox");
+    ResourceManager::LoadShader("../Glitter/Resources/Shaders/ScreenShader.vert", "../Glitter/Resources/Shaders/ScreenShader.frag", nullptr, "screen");
+    ResourceManager::LoadShader("../Glitter/Resources/Shaders/Basic.vert", "../Glitter/Resources/Shaders/Basic.frag", nullptr ,"basic");
 
     
     //Shader shader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag");
@@ -175,7 +175,7 @@ int main()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-    mouseCube = new Cube(glm::vec3(-0.01f, -0.01f, 0.0f), glm::vec3(0.02f, 0.02f, 0.0f), "Resources/Textures/", "Button.png");
+    mouseCube = new Cube(glm::vec3(-0.01f, -0.01f, 0.0f), glm::vec3(0.02f, 0.02f, 0.0f), "../Glitter/Resources/Textures/", "Button.png");
     mouseModel = glm::mat4(1.0f);
 
     Scene* scene = new Scene();
