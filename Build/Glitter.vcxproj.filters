@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Vangel\source\repos\Glitter\Glitter\Sources\main.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Vangel\source\repos\Glitter\Glitter\Vendor\glad\src\glad.c">
+      <Filter>Vendors</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.hpp">
+      <Filter>Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ResourceManager.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.hpp">
+      <Filter>Headers</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="AABB.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="MainCharacter.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Level_1.cpp">
+      <Filter>Levels</Filter>
+    </ClCompile>
+    <ClCompile Include="Sscene.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMap.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Shader.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Glitter\Headers\glitter.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManager.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MainCharacter.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMap.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Vangel\source\repos\Glitter\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Vangel\source\repos\Glitter\.gitattributes" />
+    <None Include="C:\Users\Vangel\source\repos\Glitter\.gitignore" />
+    <None Include="C:\Users\Vangel\source\repos\Glitter\.gitmodules" />
+    <None Include="C:\Users\Vangel\source\repos\Glitter\Readme.md" />
+    <None Include="Resources\Shaders\shader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\shader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\LightShader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\LightShader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\ModelShader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\ModelShader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\OutlineShader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\OutlineShader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\skyboxShader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\skyboxShader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\ScreenShader.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\ScreenShader.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\Basic.frag">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+    <None Include="Resources\Shaders\Basic.vert">
+      <Filter>Resources\Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{796541FE-B46F-37BF-9B5C-5AC36D92EE89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{8AA066DD-23A5-39B3-86C4-BD41E81380C3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Vendors">
+      <UniqueIdentifier>{4E06D690-E1EF-369A-A82B-3C76FE23B1D9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{97ae5713-202f-49aa-9018-d7ef007f643c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Shaders">
+      <UniqueIdentifier>{7f77a8d9-2e80-496d-a78b-9a4eccf6c274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures">
+      <UniqueIdentifier>{e173d7ee-3d5d-489f-b988-efbdfce3dbfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Objects">
+      <UniqueIdentifier>{e5923696-2991-42b3-835a-647b5d28b5b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Objects\Backpack">
+      <UniqueIdentifier>{862a13c6-0921-4581-a27d-228b2e408200}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\Textures\skybox">
+      <UniqueIdentifier>{64aa053c-0e52-4e2a-be40-ad6178b0c4e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Levels">
+      <UniqueIdentifier>{48eb516e-108b-4b60-b675-5c956568e7d2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\Textures\wall.jpg">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\awesomeface.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\container.jpg">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\container2.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\matrix.jpg">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\container2_specular.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\skybox\back.jpg">
+      <Filter>Resources\Textures\skybox</Filter>
+    </Image>
+    <Image Include="Resources\Textures\skybox\bottom.jpg">
+      <Filter>Resources\Textures\skybox</Filter>
+    </Image>
+    <Image Include="Resources\Textures\skybox\front.jpg">
+      <Filter>Resources\Textures\skybox</Filter>
+    </Image>
+    <Image Include="Resources\Textures\skybox\left.jpg">
+      <Filter>Resources\Textures\skybox</Filter>
+    </Image>
+    <Image Include="Resources\Textures\skybox\right.jpg">
+      <Filter>Resources\Textures\skybox</Filter>
+    </Image>
+    <Image Include="Resources\Textures\skybox\top.jpg">
+      <Filter>Resources\Textures\skybox</Filter>
+    </Image>
+    <Image Include="Resources\Textures\Button.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

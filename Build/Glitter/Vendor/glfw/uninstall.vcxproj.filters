@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Vangel\source\repos\Glitter\Build\CMakeFiles\f1b2a904c07c71290c25312f77d2a8e0\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Vangel\source\repos\Glitter\Glitter\Vendor\glfw\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Vangel\source\repos\Glitter\Build\Glitter\Vendor\glfw\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C91C46D3-6C61-3552-9671-B83AFAC54727}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
