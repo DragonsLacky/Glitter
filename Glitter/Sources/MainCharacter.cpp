@@ -41,8 +41,8 @@ MainCharacter::MainCharacter()
 
 void  MainCharacter::gravity()
 {
-    model = glm::translate(model, glm::vec3(0, -0.005995, 0));
-    updateBoxes(glm::vec3(0, -0.005995, 0));
+    model = glm::translate(model, glm::vec3(0, -0.0095995, 0));
+    updateBoxes(glm::vec3(0, -0.0095995, 0));
 }
 
 void MainCharacter::walk(walk_direction dir, float deltatime)
@@ -142,8 +142,8 @@ AABB& MainCharacter::attack()
 
 void MainCharacter::jump()
 {
-    model = glm::translate(model, glm::vec3(0, 0.0097995, 0));
-    updateBoxes(glm::vec3(glm::vec3(0, 0.0097995, 0)));
+    model = glm::translate(model, glm::vec3(0, 0.0197995, 0));
+    updateBoxes(glm::vec3(glm::vec3(0, 0.0197995, 0)));
 }
 
 void MainCharacter::crouchHold()

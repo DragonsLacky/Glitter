@@ -15,13 +15,16 @@ void Scene::Draw()
 
 void Scene::NextLevel()
 {
+	loading = true;
+	level->character->walk(Right, 0.0001);
+	level->character->resetModel();
+	level->character->resetBoxes();
+	camera->Position = camera->startPos;
 	Level* lvl = level->getNextLevel();
 	delete level;
 	level = lvl;
 	startingScreen->Level1 = lvl;
-	level->character->walk(Right, 0.01);
-	level->character->resetModel();
-	level->character->resetBoxes();
+	level->camera = camera;
 }
 
 void Scene::processMovement(GLFWwindow* window, float deltaTime)
@@ -30,13 +33,26 @@ void Scene::processMovement(GLFWwindow* window, float deltaTime)
 	{
 		NextLevel();
 	}
-	level->processMovement(window, deltaTime);
+	else
+	{
+		level->processMovement(window, deltaTime);
+		if (loading)
+		{
+			level->character->resetModel();
+			level->character->resetBoxes();
+			camera->Position = camera->startPos;
+			loading = false;
+		}
+	}
+
 }
 
 Scene::Scene()
 {
 	startingScreen = new StartScreen();
 	level = startingScreen->Level1;
+	level->camera = camera;
+	loading = false;
 }
 
 Scene::~Scene()

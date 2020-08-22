@@ -39,7 +39,7 @@ int numJumps = 0;
 
 
 //camera
-Camera camera(glm::vec3(-1.2f, 2.0f, 6.0f));
+Camera* camera =new Camera(glm::vec3(-1.2f, 2.0f, 6.0f));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -210,7 +210,8 @@ int main()
     mouseModel = glm::mat4(1.0f);
 
     Scene* scene = new Scene();
-
+    scene->camera = camera;
+    scene->level->camera = camera;
     //AABB box = scene->level->DestCubes[0].boundingBox;
     //Cube* cube = new Cube(glm::vec3(box.min.x, box.max.y, box.min.z), glm::vec3(box.max.x - box.min.x, -(box.min.y - box.max.y), box.max.z - box.min.z), "Resources/Textures/", "grass.jpg");
 
@@ -229,21 +230,21 @@ int main()
         glm::mat4 lightProjection, lightView;
         glm::mat4 lightSpaceMatrix;
         float near_plane = 1.0f, far_plane = 7.5f;
-        lightProjection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
+        lightProjection = glm::perspective(glm::radians(camera->Zoom), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
         //lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
         lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
         lightSpaceMatrix = lightProjection * lightView;
 
         glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera->GetViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         // Cubes
         ResourceManager::GetShader("shader").use();
         ResourceManager::GetShader("shader").setMat4("model", model);
         ResourceManager::GetShader("shader").setMat4("view", view);
         ResourceManager::GetShader("shader").setMat4("projection", projection);
-        ResourceManager::GetShader("shader").setVec3("viewPos", camera.Position);
+        ResourceManager::GetShader("shader").setVec3("viewPos", camera->Position);
 
         // model
         ResourceManager::GetShader("model").use();
@@ -252,7 +253,7 @@ int main()
 
         // skybox
         ResourceManager::GetShader("skybox").use();
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+        view = glm::mat4(glm::mat3(camera->GetViewMatrix()));
         ResourceManager::GetShader("skybox").setMat4("view", view);
         ResourceManager::GetShader("skybox").setMat4("projection", projection);
 
@@ -381,37 +382,20 @@ void processInput(GLFWwindow* window, Scene* scene)
     }
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera->ProcessKeyboard(FORWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera->ProcessKeyboard(BACKWARD, deltaTime);
     }
     /*if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        mainchar.walk(Left, deltaTime * 2.5f);
+        camera.ProcessKeyboard(LEFT, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        mainchar.walk(Right, deltaTime * 2.5f);
-    }*/
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    {
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    {
         camera.ProcessKeyboard(RIGHT, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    {
-        //camera.ProcessKeyboard(UP, deltaTime);
-    }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-    {
-        //camera.ProcessKeyboard(DOWN, deltaTime);
-    }
-    
+    }*/
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -443,14 +427,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         mouseCube->updateBox(glm::vec3(xoffset*0.007f, yoffset*0.007f, 0.0f));
         mouseModel = glm::translate(mouseModel, glm::vec3(xoffset * 0.007f, yoffset * 0.007f, 0.0f));
     }
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll(yoffset);
+    camera->ProcessMouseScroll(yoffset);
 }
 
 unsigned int loadTexture(char const* path)

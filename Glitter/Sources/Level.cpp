@@ -9,6 +9,7 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 		if (!CollisionLeftSide())
 		{
 			character->walk(Left, movement);
+			camera->ProcessKeyboard(LEFT, deltaTime);
 		}
 	}
 	
@@ -17,6 +18,7 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 		if (!CollisionRightSide())
 		{
 			character->walk(Right, movement);
+			camera->ProcessKeyboard(RIGHT, deltaTime);
 		}
 	}
 
@@ -26,32 +28,32 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 			character->finishedJump = false;
 			character->pressedBeforeJump = true;
 		}
-		else if (character->numberOfJumpFrames == 600)
+		else if (character->numberOfJumpFrames == 200)
 		{
 			character->numberOfJumpFrames = 0;
 			character->pressedBeforeJump = false;
 		}
 		else if (character->finishedJump) {
-			if (character->numberOfJumpFrames % 3 == 0) {
+			if (character->numberOfJumpFrames % 2 == 0) {
 
 			}
 			character->numberOfJumpFrames++;
 		}
-		else if (character->numJumps == 600 && !character->finishedJump)
+		else if (character->numJumps == 200 && !character->finishedJump)
 		{
 			character->numJumps = 0;
 			character->finishedJump = true;
 		}
 		else {
-			if (character->numJumps % 3 == 0) {
+			if (character->numJumps % 2 == 0) {
 				if (!CollisionAbove())
 				{
 					character->jump();
+					camera->ProcessKeyboard(UP, deltaTime);
 				}
 			}
 			character->numJumps++;
 		}
-		
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || character->pressedBeforeCrouch) {
@@ -171,6 +173,17 @@ void Level::CollisionBellow()
 	if (!intersects && character->finishedJump)
 	{
 		character->gravity();
+		camera->ProcessKeyboard(DOWN, 1);
+		box = character->box();
+		box.max.y = box.max.y - 0.1;
+		box.min.x = box.min.x + 0.1;
+		box.max.x = box.max.x - 0.1;
+		intersects = Collision(box);
+		if (!intersects && character->finishedJump)
+		{
+			character->gravity();
+			camera->ProcessKeyboard(DOWN, 1);
+		}
 	}
 	if (intersects && character->finishedJump && character->pressedBeforeJump)
 	{
@@ -336,7 +349,7 @@ void Level::Draw()
 				model = glm::translate(model, light->position);
 			}
 			lightShader.setMat4("model", model);
-			lightCube.Draw();
+			lightCube->Draw();
 		}
 	}
 
@@ -390,7 +403,7 @@ void Level::DrawShadowMap()
 				model = glm::translate(model, light->position);
 			}
 			shader.setMat4("model", model);
-			lightCube.Draw();
+			lightCube->Draw();
 		}
 	}
 }
@@ -450,13 +463,13 @@ StartScreen::~StartScreen()
 Level::Level()
 {
 	character = new MainCharacter();
-	lightCube = Cube(glm::vec3(-0.1f, -0.1f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Resources/Textures/", "light", ".jpg");
+	lightCube = new Cube(glm::vec3(-0.1f, -0.1f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Resources/Textures/", "light", ".jpg");
 }
 
 Level::Level(MainCharacter* mc)
 {
 	character = mc;
-	lightCube = Cube(glm::vec3(-0.1f, -0.1f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Resources/Textures/", "light", ".jpg");
+	lightCube = new Cube(glm::vec3(-0.1f, -0.1f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Resources/Textures/", "light", ".jpg");
 }
 
 
@@ -464,6 +477,7 @@ Level::~Level()
 {
 	//delete character;
 	delete objective;
+	delete lightCube;
 	for each (Light* light in lights)
 	{
 		delete light;

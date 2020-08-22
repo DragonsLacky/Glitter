@@ -6,6 +6,7 @@
 #include "AABB.hpp"
 #include "CubeMap.hpp"
 #include "Light.hpp"
+#include "Camera.hpp"
 
 enum LEVEL {
 	Level_01, Level_02, Level_03
@@ -19,10 +20,11 @@ public:
 	vector<Model> enemies;
 	vector<Cube> cubes;
 	vector<Cube> DestCubes;
-	Cube lightCube;
+	Cube* lightCube;
 	vector<Model> objects;
 	vector<Model> DestructableObjects;
 	vector<Light*> lights;
+	Camera* camera;
 	Cube* objective;
 	CubeMap skybox;
 
