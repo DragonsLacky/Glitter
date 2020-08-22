@@ -27,12 +27,14 @@ class Cube
 public:
 	AABB boundingBox;
 	Cube() = default;
-	Cube(glm::vec3 position, glm::vec3 length, string path, string name, bool isSolid = true);
+	Cube(glm::vec3 position, glm::vec3 length, string path, string name, string ext, bool isSolid = true);
 	~Cube();
 	void Draw();
 	void updateBox(glm::vec3 model);
 	void initVertices(glm::vec3 position, glm::vec3 length);
-	void setUpObject(string path, string name); 
+	void setUpObject(string path, string name, string ext); 
+	unsigned int VAO;
+
 private:
 	//front - back - left - right - top - bottom
 	vector<Texture> textures;
@@ -40,7 +42,6 @@ private:
 	string name;
 
 	bool isSolid;
-	unsigned int VAO;
 	unsigned int VBO, EBO;
 
 };

@@ -29,6 +29,11 @@ MainCharacter::MainCharacter()
     }
     character[3].boundingBox.min.y = character[0].boundingBox.min.y;
 
+    for (unsigned short int i = 0; i < character.size(); i++)
+    {
+        character[i].startBox = character[i].boundingBox;
+    }
+
     modelState = 0;
     model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
     model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f));
@@ -105,6 +110,22 @@ void MainCharacter::updateBoxes(glm::vec3 m)
     }
 }
 
+void MainCharacter::resetBoxes()
+{
+    for (unsigned short int i = 0; i < character.size(); i++)
+    {
+        character[i].resetBox();
+    }
+}
+void MainCharacter::resetModel()
+{
+    modelState = 0;
+    model = glm::mat4(1.0f);
+    model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
+    model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f));
+}
+
+
 void MainCharacter::Draw()
 {
     Shader& shader = ResourceManager::GetShader("model");
@@ -121,8 +142,8 @@ AABB& MainCharacter::attack()
 
 void MainCharacter::jump()
 {
-    model = glm::translate(model, glm::vec3(0, 0.007995, 0));
-    updateBoxes(glm::vec3(glm::vec3(0, 0.007995, 0)));
+    model = glm::translate(model, glm::vec3(0, 0.0097995, 0));
+    updateBoxes(glm::vec3(glm::vec3(0, 0.0097995, 0)));
 }
 
 void MainCharacter::crouchHold()

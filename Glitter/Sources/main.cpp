@@ -2,7 +2,6 @@
 #include "glitter.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
-#include "Light.hpp"
 //#include "../../Build/Model.hpp"
 //#include "../../Build/Cube.hpp"
 #include "Scene.hpp"
@@ -28,12 +27,13 @@ unsigned int loadTexture(const char* path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
 
 //jump-crouch
 bool pressedBeforeJump = false;
 bool pressedBeforeCrouch = false;
 bool finishedJump = true;
+bool dead = false;
 int numberOfJumpFrames = 0;
 int numJumps = 0;
 
@@ -48,7 +48,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
 
 
 Cube* mouseCube = nullptr;
@@ -125,6 +125,9 @@ int main()
     ResourceManager::LoadShader("../Glitter/Shaders/skyboxShader.vert", "../Glitter/Shaders/skyboxShader.frag", nullptr, "skybox");
     ResourceManager::LoadShader("../Glitter/Shaders/ScreenShader.vert", "../Glitter/Shaders/ScreenShader.frag", nullptr, "screen");
     ResourceManager::LoadShader("../Glitter/Shaders/Basic.vert", "../Glitter/Shaders/Basic.frag", nullptr ,"basic");
+    ResourceManager::LoadShader("../Glitter/Shaders/LightShader.vert", "../Glitter/Shaders/LightShader.frag", nullptr, "lightShader");
+    ResourceManager::LoadShader("../Glitter/Shaders/sDepthShader.vert", "../Glitter/Shaders/sDepthShader.frag", nullptr, "simpleDepth");
+    //ResourceManager::LoadShader("../Glitter/Shaders/ShaddowMap.vert", "../Glitter/Shaders/ShaddowMap.frag", nullptr, "depth");
 
     
     //Shader shader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag");
@@ -138,6 +141,10 @@ int main()
     ResourceManager::GetShader("shader").use();
     ResourceManager::GetShader("shader").setInt("material.diffuse", 0);
     ResourceManager::GetShader("shader").setInt("material.specular", 1);
+    //ResourceManager::GetShader("shader").setInt("shadowMap", 2);
+    ResourceManager::GetShader("shader").setInt("material.shininess", 64);
+    ResourceManager::GetShader("shader").setInt("gamma", true);
+
 
     ResourceManager::GetShader("skybox").use();
     ResourceManager::GetShader("skybox").setInt("skybox", 0);
@@ -150,6 +157,7 @@ int main()
     ResourceManager::GetShader("basic").use();
     ResourceManager::GetShader("basic").setInt("texture1", 0);
     
+    //Cube light(glm::vec3(-0.6f, 0.6f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Textures/", "light", ".jpg");
     
     // framebuffer configuration
     // -------------------------
@@ -175,8 +183,30 @@ int main()
         cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // configure depth map FBO
+    // -----------------------
+    const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+    unsigned int depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth texture
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    mouseCube = new Cube(glm::vec3(-0.01f, -0.01f, 0.0f), glm::vec3(0.02f, 0.02f, 0.0f), "../Glitter/Resources/Textures/", "Button.png");
+    mouseCube = new Cube(glm::vec3(-0.01f, -0.01f, 0.0f), glm::vec3(0.03f, 0.04f, 0.0f), "../Glitter/Resources/Textures/", "cursor", ".png");
     mouseModel = glm::mat4(1.0f);
 
     Scene* scene = new Scene();
@@ -193,43 +223,29 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        // input
-        // -----
-        processInput(window, scene);
-        // render
-        // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+        glm::mat4 lightProjection, lightView;
+        glm::mat4 lightSpaceMatrix;
+        float near_plane = 1.0f, far_plane = 7.5f;
+        lightProjection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
+        //lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+        lightSpaceMatrix = lightProjection * lightView;
 
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        
-        //Cubes
+
+        // Cubes
         ResourceManager::GetShader("shader").use();
         ResourceManager::GetShader("shader").setMat4("model", model);
         ResourceManager::GetShader("shader").setMat4("view", view);
         ResourceManager::GetShader("shader").setMat4("projection", projection);
-        /*if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS)
-        {
-            AABB Bbox = scene->level->character->attack();
-            Cube* cube1 = new Cube(glm::vec3(Bbox.min.x, Bbox.max.y, Bbox.min.z), glm::vec3(Bbox.max.x - Bbox.min.x, -(Bbox.min.y - Bbox.max.y), Bbox.max.z - Bbox.min.z), "Resources/Textures/", "dirt.jpg");
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            cube1->Draw();
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        ResourceManager::GetShader("shader").setVec3("viewPos", camera.Position);
 
-            delete cube1;
-        }*/
-
-        /*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
-        //Models
+        // model
         ResourceManager::GetShader("model").use();
         ResourceManager::GetShader("model").setMat4("view", view);
         ResourceManager::GetShader("model").setMat4("projection", projection);
@@ -240,14 +256,51 @@ int main()
         ResourceManager::GetShader("skybox").setMat4("view", view);
         ResourceManager::GetShader("skybox").setMat4("projection", projection);
 
+        ResourceManager::GetShader("simpleDepth").use();
+        ResourceManager::GetShader("simpleDepth").setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        scene->level->DrawShadowMap();
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // reset viewport
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // input
+        // -----
+        processInput(window, scene);
+        // render
+        // ------
+        //glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         scene->Draw();
         
         ResourceManager::GetShader("basic").use();
         ResourceManager::GetShader("basic").setMat4("model", mouseModel);
-        mouseCube->Draw();
+        if (scene->startingScreen->MouseEnabled)
+        {
+            mouseCube->Draw();
+        }
         ResourceManager::GetShader("basic").setMat4("model", model);
 
+        ResourceManager::GetShader("lightShader").use();
+        ResourceManager::GetShader("lightShader").setMat4("view", view);
+        ResourceManager::GetShader("lightShader").setMat4("projection", projection);
+        ResourceManager::GetShader("lightShader").setMat4("model", model);
+
+
         //glEnable(GL_FRAMEBUFFER_SRGB);
+
+        //ResourceManager::GetShader("shader").use();
+        //light.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
@@ -263,6 +316,8 @@ int main()
         else {
             ResourceManager::GetShader("screen").setBool("blur", false);
         }
+        ResourceManager::GetShader("screen").setVec2("tlMenuCoords[3]", glm::vec2((*mouseCube).boundingBox.min.x, (*mouseCube).boundingBox.max.y));
+        ResourceManager::GetShader("screen").setVec2("brMenuCoords[3]", glm::vec2((*mouseCube).boundingBox.max.x, (*mouseCube).boundingBox.min.y));
         glBindVertexArray(quadVAO);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -292,6 +347,12 @@ void processInput(GLFWwindow* window, Scene* scene)
         {   
             if (intersect(scene->startingScreen->StartButton.boundingBox, mouseCube->boundingBox))
             {
+                if (dead)
+                {
+                    scene->level->character->walk(Right, deltaTime);
+                    scene->level->character->resetModel();
+                    scene->level->character->resetBoxes();
+                }
                 scene->startingScreen->MouseEnabled = false;
             }
             else if (intersect(scene->startingScreen->LevelsButton.boundingBox, mouseCube->boundingBox))
@@ -304,8 +365,16 @@ void processInput(GLFWwindow* window, Scene* scene)
             }
         }
     }
-    
-    scene->processMovement(window, deltaTime);
+    else 
+    {
+        scene->processMovement(window, deltaTime);
+        if (scene->level->character->box().min.y < -4)
+        {
+            scene->startingScreen->MouseEnabled = true;
+            dead = true;
+        }
+    }
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
@@ -369,9 +438,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    
-    mouseCube->updateBox(glm::vec3(xoffset*0.01f, yoffset*0.01f, 0.0f));
-    mouseModel = glm::translate(mouseModel, glm::vec3(xoffset * 0.01f, yoffset * 0.01f, 0.0f));
+    if (mouseCube->boundingBox.min.x + xoffset * 0.007f> -1 && mouseCube->boundingBox.min.y + yoffset * 0.007f > -1 && mouseCube->boundingBox.max.x + xoffset * 0.007f < 1 && mouseCube->boundingBox.max.y + yoffset * 0.007f < 1)
+    {
+        mouseCube->updateBox(glm::vec3(xoffset*0.007f, yoffset*0.007f, 0.0f));
+        mouseModel = glm::translate(mouseModel, glm::vec3(xoffset * 0.007f, yoffset * 0.007f, 0.0f));
+    }
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 

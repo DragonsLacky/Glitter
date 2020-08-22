@@ -221,6 +221,10 @@ void Model::updateBox(glm::vec3 model)
 	boundingBox.min = glm::vec3(boundingBox.min.x + model.x, boundingBox.min.y + model.y, boundingBox.min.z + model.z);
 	boundingBox.max = glm::vec3(boundingBox.max.x + model.x, boundingBox.max.y + model.y, boundingBox.max.z + model.z);
 }
+void Model::resetBox()
+{
+	boundingBox = startBox;
+}
 
 Model::~Model()
 {

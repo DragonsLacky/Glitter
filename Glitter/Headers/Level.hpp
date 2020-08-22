@@ -5,6 +5,7 @@
 #include "Cube.hpp"
 #include "AABB.hpp"
 #include "CubeMap.hpp"
+#include "Light.hpp"
 
 enum LEVEL {
 	Level_01, Level_02, Level_03
@@ -18,21 +19,26 @@ public:
 	vector<Model> enemies;
 	vector<Cube> cubes;
 	vector<Cube> DestCubes;
+	Cube lightCube;
 	vector<Model> objects;
 	vector<Model> DestructableObjects;
+	vector<Light*> lights;
 	Cube* objective;
 	CubeMap skybox;
 
 	virtual void processMovement(GLFWwindow* window, float deltaTime);
 	virtual void Draw();
+	void DrawShadowMap();
 	bool Collision(AABB& box);
 	void CollisionBellow();
 	bool CollisionRightSide();
 	bool CollisionLeftSide();
 	bool CollisionAboveCrouch();
 	bool CollisionAbove();
+	bool checkObjectiveReached();
 	virtual Level* getNextLevel() = 0;
 	Level();
+	Level(MainCharacter* mc);
 	~Level();
 
 private:
@@ -60,6 +66,7 @@ class Level_1 : public Level
 {
 public:
 	Level_1();
+	Level_1(MainCharacter* mc);
 	~Level_1();
 	virtual Level* getNextLevel();
 
@@ -74,6 +81,7 @@ class Level_2 : public Level
 public:
 	Level_2();
 	~Level_2();
+	Level_2(MainCharacter* mc);
 	virtual Level* getNextLevel();
 private:
 

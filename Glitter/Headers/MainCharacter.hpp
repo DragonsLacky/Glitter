@@ -37,6 +37,8 @@ public:
 	void crouchRelease();
 	void walk(walk_direction dir, float deltatime);
 	void gravity();
+	void resetBoxes();
+	void resetModel();
 	AABB& attack();
     void Draw();
 	void flipBoundingBox(bool right);

@@ -30,6 +30,7 @@ public:
 	vector<Mesh> meshes;
 	string directory;
 	AABB boundingBox;
+	AABB startBox;
 	bool gammaCorrection;
 	glm::mat4 model;
 
@@ -37,6 +38,7 @@ public:
 	~Model();
 	void Draw(Shader& shader);
 	void updateBox(glm::vec3 model);
+	void resetBox();
 	void updateModelMatrix(glm::mat4 modelm);
 private:
 

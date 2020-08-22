@@ -15,16 +15,21 @@ void Scene::Draw()
 
 void Scene::NextLevel()
 {
-	if (intersect(level->character->box(), level->objective->boundingBox))
-	{
-		Level* lvl = level->getNextLevel();
-		delete level;
-		level = lvl;
-	}
+	Level* lvl = level->getNextLevel();
+	delete level;
+	level = lvl;
+	startingScreen->Level1 = lvl;
+	level->character->walk(Right, 0.01);
+	level->character->resetModel();
+	level->character->resetBoxes();
 }
 
 void Scene::processMovement(GLFWwindow* window, float deltaTime)
 {
+	if (level->checkObjectiveReached())
+	{
+		NextLevel();
+	}
 	level->processMovement(window, deltaTime);
 }
 
