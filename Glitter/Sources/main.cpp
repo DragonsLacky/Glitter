@@ -120,11 +120,11 @@ int main()
     // build and compile our shader program
     // ------------------------------------
     // vertex shader
-    ResourceManager::LoadShader("../Glitter/Resources/Shaders/shader.vert", "../Glitter//Resources/Shaders/shader.frag",nullptr, "shader");
-    ResourceManager::LoadShader("../Glitter/Resources/Shaders/ModelShader.vert", "../Glitter/Resources/Shaders/ModelShader.frag", nullptr, "model");
-    ResourceManager::LoadShader("../Glitter/Resources/Shaders/skyboxShader.vert", "../Glitter/Resources/Shaders/skyboxShader.frag", nullptr, "skybox");
-    ResourceManager::LoadShader("../Glitter/Resources/Shaders/ScreenShader.vert", "../Glitter/Resources/Shaders/ScreenShader.frag", nullptr, "screen");
-    ResourceManager::LoadShader("../Glitter/Resources/Shaders/Basic.vert", "../Glitter/Resources/Shaders/Basic.frag", nullptr ,"basic");
+    ResourceManager::LoadShader("../Glitter/Shaders/shader.vert", "../Glitter/Shaders/shader.frag",nullptr, "shader");
+    ResourceManager::LoadShader("../Glitter/Shaders/ModelShader.vert", "../Glitter/Shaders/ModelShader.frag", nullptr, "model");
+    ResourceManager::LoadShader("../Glitter/Shaders/skyboxShader.vert", "../Glitter/Shaders/skyboxShader.frag", nullptr, "skybox");
+    ResourceManager::LoadShader("../Glitter/Shaders/ScreenShader.vert", "../Glitter/Shaders/ScreenShader.frag", nullptr, "screen");
+    ResourceManager::LoadShader("../Glitter/Shaders/Basic.vert", "../Glitter/Shaders/Basic.frag", nullptr ,"basic");
 
     
     //Shader shader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag");
@@ -136,8 +136,9 @@ int main()
     //Shader screenShader("Resources/Shaders/ScreenShader.vert", "Resources/Shaders/ScreenShader.frag");
 
     ResourceManager::GetShader("shader").use();
-    ResourceManager::GetShader("shader").setInt("texture1", 0);
-    
+    ResourceManager::GetShader("shader").setInt("material.diffuse", 0);
+    ResourceManager::GetShader("shader").setInt("material.specular", 1);
+
     ResourceManager::GetShader("skybox").use();
     ResourceManager::GetShader("skybox").setInt("skybox", 0);
 
@@ -255,7 +256,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         ResourceManager::GetShader("screen").use();
-        ResourceManager::GetShader("screen").setBool("blur", true);
+        if (scene->startingScreen->MouseEnabled)
+        {
+            ResourceManager::GetShader("screen").setBool("blur", true);
+        }
+        else {
+            ResourceManager::GetShader("screen").setBool("blur", false);
+        }
         glBindVertexArray(quadVAO);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -283,12 +290,17 @@ void processInput(GLFWwindow* window, Scene* scene)
     {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
         {   
-            for each (Cube cube in scene->level->cubes)
+            if (intersect(scene->startingScreen->StartButton.boundingBox, mouseCube->boundingBox))
             {
-                if (intersect(cube.boundingBox, mouseCube->boundingBox))
-                {
-                    cout << "yes" << endl;
-                }
+                scene->startingScreen->MouseEnabled = false;
+            }
+            else if (intersect(scene->startingScreen->LevelsButton.boundingBox, mouseCube->boundingBox))
+            {
+                cout << "Levels" << endl;
+            }
+            else if (intersect(scene->startingScreen->ExitButton.boundingBox, mouseCube->boundingBox))
+            {
+                glfwSetWindowShouldClose(window, true);
             }
         }
     }

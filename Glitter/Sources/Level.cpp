@@ -271,8 +271,8 @@ Level* Level_1::getNextLevel()
 
 Level_1::Level_1()
 {
-	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "..Glitter/Resources/Textures/", "grass.jpg"));
-	cubes.push_back(Cube(glm::vec3(0.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "..Glitter/Resources/Textures/", "dirt.jpg"));
+	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass.jpg"));
+	cubes.push_back(Cube(glm::vec3(0.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt.jpg"));
 
 	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass.jpg"));
 	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt.jpg"));
