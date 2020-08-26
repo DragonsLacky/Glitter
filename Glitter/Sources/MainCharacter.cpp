@@ -2,7 +2,7 @@
 
 AABB MainCharacter::box()
 {
-    return character[modelState == 1 || modelState == 2 ? 0 : modelState == 4 || modelState == 5 ? 3 : modelState].boundingBox;
+    return character[modelState == 1 || modelState == 2 || modelState == 6 ? 0 : modelState == 4 || modelState == 5 ? 3 : modelState].boundingBox;
 }
 
 MainCharacter::MainCharacter()
@@ -10,6 +10,7 @@ MainCharacter::MainCharacter()
     character.push_back(Model("../Glitter/Resources/Objects/MainCharacter/MainCharacter-normal/mainCharacter.obj"));
     character.push_back(Model("../Glitter/Resources/Objects/MainCharacter/MainCharacter-walk1/mainCharacter.obj"));
     character.push_back(Model("../Glitter/Resources/Objects/MainCharacter/MainCharacter-walk2/mainCharacter.obj"));
+
     for (unsigned short int i = 0; i < character.size(); i++)
     {
         character[i].boundingBox.max.y = character[i].boundingBox.max.y + 0.9;
@@ -34,6 +35,9 @@ MainCharacter::MainCharacter()
         character[i].startBox = character[i].boundingBox;
     }
 
+    character.push_back(Model("../Glitter/Resources/Objects/MainCharacter/MainCharacter-attack/mainCharacter.obj"));
+
+
     modelState = 0;
     model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
     model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f));
@@ -47,7 +51,7 @@ void  MainCharacter::gravity()
 
 void MainCharacter::walk(walk_direction dir, float deltatime)
 {
-    if (framecount_walk == 80)
+    if (framecount_walk == 30)
     {
         switch (modelState)
         {
@@ -57,6 +61,7 @@ void MainCharacter::walk(walk_direction dir, float deltatime)
         case 3: modelState = altWalk ? 4 : 5; altWalk = !altWalk; break;
         case 4: modelState = 3; break;
         case 5: modelState = 3; break;
+        case 6: modelState = 0; break;
         default:
             break;
         }
@@ -129,14 +134,14 @@ void MainCharacter::resetModel()
 void MainCharacter::Draw()
 {
     Shader& shader = ResourceManager::GetShader("model");
-    shader.setMat4("model", model);
-    //std::wcout << modelState << std::endl;
+    character[modelState].model = model;
     character[modelState].Draw(shader);
 }
 
 AABB& MainCharacter::attack()
 {
     AABB Bbox = box();
+    modelState = 6;
     return facingRight? AABB(glm::vec3(Bbox.max.x, Bbox.min.y, Bbox.min.z), glm::vec3(Bbox.max.x + 1.0f, Bbox.max.y, Bbox.max.z)) : AABB(glm::vec3(Bbox.min.x - 1.0f, Bbox.min.y, Bbox.min.z), glm::vec3(Bbox.min.x, Bbox.max.y, Bbox.max.z));
 }
 

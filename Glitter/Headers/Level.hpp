@@ -20,6 +20,7 @@ public:
 	vector<Model> enemies;
 	vector<Cube> cubes;
 	vector<Cube> DestCubes;
+	vector<Cube> interiors;
 	Cube* lightCube;
 	vector<Model> objects;
 	vector<Model> DestructableObjects;

@@ -30,7 +30,7 @@ public:
 	int framecount_walk = 0;
 	int numberOfJumpFrames = 0;
 	int numJumps = 0;
-
+	bool attacked = false;
 
 	void jump();
 	void crouchHold();

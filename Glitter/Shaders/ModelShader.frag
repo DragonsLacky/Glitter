@@ -51,12 +51,24 @@ void main()
     vec3 color = texture(texture_diffuse1, TexCoords).rgb;
     vec3 lighting = vec3(0.0f);
     
+    vec3 ambient = vec3(0.0f);
+    vec3 diffuse = vec3(0.0f);
+
     for (int i = 0; i < size; ++i)
     {
         lighting += BlinnPhong(Normal, FragPos, Lights[i]);
+        vec3 lightDir = normalize(Lights[i].position - FragPos);
+        float diff = max(dot(lightDir, Normal), 0.0);
+        diffuse += Lights[i].diffuse * diff;
+        ambient += Lights[i].ambient;
     }
 
+    ambient *=color;
+    diffuse *= color;
     color *= lighting;
+
+    color += ambient;
+    color += diffuse;
 
     if (gamma)
     {
@@ -94,7 +106,7 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
     {
         distance = length(light.position - fragPos);
     }
-    float attenuation = 1.0 /(light.constant + light.linear * distance + 
+    float attenuation = 1.0 / (light.constant + light.linear * distance + 
   			     light.quadratic * (distance * distance)); //(light.constant + (gamma ? light.quadratic * distance * distance : light.linear * distance));
     
     diffuse *= attenuation;

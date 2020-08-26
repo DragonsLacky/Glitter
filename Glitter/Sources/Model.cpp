@@ -3,11 +3,13 @@
 Model::Model(char* path, bool gamma) : gammaCorrection(gamma)
 {
 	loadModel(path);
+	model = glm::mat4(1.0f);
 }
 
 void Model::Draw(Shader& shader)
 {
-	//shader.setMat4("model", this->model);
+	shader.use();
+	shader.setMat4("model", this->model);
 	for (unsigned int i = 0; i < meshes.size(); i++)
 	{
 		meshes[i].Draw(shader);

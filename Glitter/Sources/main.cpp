@@ -48,7 +48,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
+glm::vec3 lightPos(0.0f, 4.0f, 0.0f);
 
 
 Cube* mouseCube = nullptr;
@@ -93,7 +93,8 @@ int main()
 
     //Global opengl state
     glEnable(GL_DEPTH_TEST);
-    
+    //glEnable(GL_CULL_FACE);
+
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
         -1.0f,  1.0f,  0.0f, 1.0f,
@@ -126,8 +127,14 @@ int main()
     ResourceManager::LoadShader("../Glitter/Shaders/ScreenShader.vert", "../Glitter/Shaders/ScreenShader.frag", nullptr, "screen");
     ResourceManager::LoadShader("../Glitter/Shaders/Basic.vert", "../Glitter/Shaders/Basic.frag", nullptr ,"basic");
     ResourceManager::LoadShader("../Glitter/Shaders/LightShader.vert", "../Glitter/Shaders/LightShader.frag", nullptr, "lightShader");
-    ResourceManager::LoadShader("../Glitter/Shaders/sDepthShader.vert", "../Glitter/Shaders/sDepthShader.frag", nullptr, "simpleDepth");
+    ResourceManager::LoadShader("../Glitter/Shaders/sDepthShader.vert", "../Glitter/Shaders/sDepthShader.frag", "../Glitter/Shaders/sDepthShader.geom", "simpleDepth");
     //ResourceManager::LoadShader("../Glitter/Shaders/ShaddowMap.vert", "../Glitter/Shaders/ShaddowMap.frag", nullptr, "depth");
+    Shader& shader = ResourceManager::GetShader("shader");
+    Shader& modelShader = ResourceManager::GetShader("model");
+    Shader& skyboxShader = ResourceManager::GetShader("skybox");
+    Shader& screenShader = ResourceManager::GetShader("screen");
+    Shader& basicShader = ResourceManager::GetShader("basic");
+    Shader& simpleDepthShader = ResourceManager::GetShader("simpleDepth");
 
     
     //Shader shader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag");
@@ -138,24 +145,24 @@ int main()
     //screen
     //Shader screenShader("Resources/Shaders/ScreenShader.vert", "Resources/Shaders/ScreenShader.frag");
 
-    ResourceManager::GetShader("shader").use();
-    ResourceManager::GetShader("shader").setInt("material.diffuse", 0);
-    ResourceManager::GetShader("shader").setInt("material.specular", 1);
-    //ResourceManager::GetShader("shader").setInt("shadowMap", 2);
-    ResourceManager::GetShader("shader").setInt("material.shininess", 64);
-    ResourceManager::GetShader("shader").setInt("gamma", true);
+    shader.use();
+    shader.setInt("material.diffuse", 0);
+    shader.setInt("material.specular", 1);
+    shader.setInt("depthMap", 2);
+    shader.setInt("material.shininess", 64);
+    shader.setInt("gamma", true);
 
 
-    ResourceManager::GetShader("skybox").use();
-    ResourceManager::GetShader("skybox").setInt("skybox", 0);
+    skyboxShader.use();
+    skyboxShader.setInt("skybox", 0);
 
-    ResourceManager::GetShader("screen").use();
-    ResourceManager::GetShader("screen").setInt("screenTexture", 0);
-    ResourceManager::GetShader("screen").setFloat("targetWidth", SCR_WIDTH/4);
-    ResourceManager::GetShader("screen").setFloat("targetHeight", SCR_HEIGHT/4);
+    screenShader.use();
+    screenShader.setInt("screenTexture", 0);
+    screenShader.setFloat("targetWidth", SCR_WIDTH/4);
+    screenShader.setFloat("targetHeight", SCR_HEIGHT/4);
 
-    ResourceManager::GetShader("basic").use();
-    ResourceManager::GetShader("basic").setInt("texture1", 0);
+    basicShader.use();
+    basicShader.setInt("texture1", 0);
     
     //Cube light(glm::vec3(-0.6f, 0.6f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Textures/", "light", ".jpg");
     
@@ -188,20 +195,20 @@ int main()
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     unsigned int depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
-    // create depth texture
-    unsigned int depthMap;
-    glGenTextures(1, &depthMap);
-    glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // create depth cubemap texture
+    unsigned int depthCubemap;
+    glGenTextures(1, &depthCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     // attach depth texture as FBO's depth buffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -227,42 +234,49 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 lightProjection, lightView;
-        glm::mat4 lightSpaceMatrix;
-        float near_plane = 1.0f, far_plane = 7.5f;
-        lightProjection = glm::perspective(glm::radians(camera->Zoom), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
+        float near_plane = 1.0f;
+        float far_plane = 25.0f;
+        glm::mat4 shadowProj = glm::perspective(glm::radians(camera->Zoom), (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT, near_plane, far_plane); // note that if you use a perspective projection matrix you'll have to change the light position as the current light position isn't enough to reflect the whole scene
         //lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
-        lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-        lightSpaceMatrix = lightProjection * lightView;
+        std::vector<glm::mat4> shadowTransforms;
+        
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+        shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera->GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         // Cubes
-        ResourceManager::GetShader("shader").use();
-        ResourceManager::GetShader("shader").setMat4("model", model);
-        ResourceManager::GetShader("shader").setMat4("view", view);
-        ResourceManager::GetShader("shader").setMat4("projection", projection);
-        ResourceManager::GetShader("shader").setVec3("viewPos", camera->Position);
+        shader.use();
+        shader.setMat4("model", model);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+        shader.setVec3("viewPos", camera->Position);
 
         // model
-        ResourceManager::GetShader("model").use();
-        ResourceManager::GetShader("model").setMat4("view", view);
-        ResourceManager::GetShader("model").setMat4("projection", projection);
+        modelShader.use();
+        modelShader.setMat4("view", view);
+        modelShader.setMat4("projection", projection);
 
         // skybox
-        ResourceManager::GetShader("skybox").use();
+        skyboxShader.use();
         view = glm::mat4(glm::mat3(camera->GetViewMatrix()));
-        ResourceManager::GetShader("skybox").setMat4("view", view);
-        ResourceManager::GetShader("skybox").setMat4("projection", projection);
-
-        ResourceManager::GetShader("simpleDepth").use();
-        ResourceManager::GetShader("simpleDepth").setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        skyboxShader.setMat4("view", view);
+        skyboxShader.setMat4("projection", projection);
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
         glClear(GL_DEPTH_BUFFER_BIT);
+        simpleDepthShader.use();
+        for (unsigned int i = 0; i < 6; ++i)
+            simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
+        simpleDepthShader.setFloat("far_plane", far_plane);
+        simpleDepthShader.setVec3("lightPos", lightPos);
         scene->level->DrawShadowMap();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // reset viewport
@@ -271,6 +285,7 @@ int main()
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         // input
@@ -282,25 +297,24 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        shader.use();
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+        shader.setFloat("far_plane", far_plane);
+
         scene->Draw();
         
-        ResourceManager::GetShader("basic").use();
-        ResourceManager::GetShader("basic").setMat4("model", mouseModel);
+        basicShader.use();
+        basicShader.setMat4("model", mouseModel);
         if (scene->startingScreen->MouseEnabled)
         {
             mouseCube->Draw();
         }
-        ResourceManager::GetShader("basic").setMat4("model", model);
-
-        ResourceManager::GetShader("lightShader").use();
-        ResourceManager::GetShader("lightShader").setMat4("view", view);
-        ResourceManager::GetShader("lightShader").setMat4("projection", projection);
-        ResourceManager::GetShader("lightShader").setMat4("model", model);
-
+        basicShader.setMat4("model", model);
 
         //glEnable(GL_FRAMEBUFFER_SRGB);
 
-        //ResourceManager::GetShader("shader").use();
+        //shader.use();
         //light.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -309,16 +323,16 @@ int main()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessery actually, since we won't be able to see behind the quad anyways)
         glClear(GL_COLOR_BUFFER_BIT);
 
-        ResourceManager::GetShader("screen").use();
+        screenShader.use();
         if (scene->startingScreen->MouseEnabled)
         {
-            ResourceManager::GetShader("screen").setBool("blur", true);
+            screenShader.setBool("blur", true);
         }
         else {
-            ResourceManager::GetShader("screen").setBool("blur", false);
+            screenShader.setBool("blur", false);
         }
-        ResourceManager::GetShader("screen").setVec2("tlMenuCoords[3]", glm::vec2((*mouseCube).boundingBox.min.x, (*mouseCube).boundingBox.max.y));
-        ResourceManager::GetShader("screen").setVec2("brMenuCoords[3]", glm::vec2((*mouseCube).boundingBox.max.x, (*mouseCube).boundingBox.min.y));
+        screenShader.setVec2("tlMenuCoords[3]", glm::vec2((*mouseCube).boundingBox.min.x, (*mouseCube).boundingBox.max.y));
+        screenShader.setVec2("brMenuCoords[3]", glm::vec2((*mouseCube).boundingBox.max.x, (*mouseCube).boundingBox.min.y));
         glBindVertexArray(quadVAO);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -353,6 +367,8 @@ void processInput(GLFWwindow* window, Scene* scene)
                     scene->level->character->walk(Right, deltaTime);
                     scene->level->character->resetModel();
                     scene->level->character->resetBoxes();
+                    scene->camera->Position = scene->camera->startPos;
+                    dead = false;
                 }
                 scene->startingScreen->MouseEnabled = false;
             }

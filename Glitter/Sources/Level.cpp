@@ -2,7 +2,7 @@
 
 void Level::processMovement(GLFWwindow* window, float deltaTime)
 {
-	float movement = deltaTime * 2.5f;
+	float movement = deltaTime * 3.0f;
 	CollisionBellow();
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
@@ -77,6 +77,12 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 				i--;
 			}
 		}
+		character->attacked = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_RELEASE && character->attacked)
+	{
+		character->modelState = 0;
+		character->attacked = false;
 	}
 }
 
@@ -200,7 +206,7 @@ bool Level::checkObjectiveReached()
 void Level::Draw()
 {
 	Shader& shader = ResourceManager::GetShader("shader");
-	Shader& shader1 = ResourceManager::GetShader("model");
+	Shader& modelShader = ResourceManager::GetShader("model");
 
 	shader.use();
 	shader.setBool("gamma", false);
@@ -220,9 +226,9 @@ void Level::Draw()
 			if (light != nullptr)
 			{
 				shader.setVec3(l + "].direction", light->direction);
-				shader1.setFloat(l + "].constant", 1);
-				shader1.setFloat(l + "].linear", 0.0014);
-				shader1.setFloat(l + "].quadratic", 0.000007);
+				shader.setFloat(l + "].constant", 1);
+				shader.setFloat(l + "].linear", 0.0014);
+				shader.setFloat(l + "].quadratic", 0.000007);
 			}
 		}
 		else if (lights[i]->type == 1)
@@ -261,27 +267,34 @@ void Level::Draw()
 	{
 		cube.Draw();
 	}
-
-	shader1.use();
-	shader1.setBool("gamma", false);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CW);
+	for each (Cube cube in interiors)
+	{
+		cube.Draw();
+	}
+	glDisable(GL_CULL_FACE);
+	modelShader.use();
+	modelShader.setBool("gamma", false);
 	for (int i = 0; i < lights.size(); i++)
 	{
 		string l = "Lights[" + to_string(i);
-		shader1.setInt(l + "].type", lights[i]->type);
-		shader1.setVec3(l + "].ambient", lights[i]->ambient);
-		shader1.setVec3(l + "].diffuse", lights[i]->diffuse);
-		shader1.setVec3(l + "].specular", lights[i]->specular);
-		shader1.setVec3(l + "].color", lights[i]->color);
+		modelShader.setInt(l + "].type", lights[i]->type);
+		modelShader.setVec3(l + "].ambient", lights[i]->ambient);
+		modelShader.setVec3(l + "].diffuse", lights[i]->diffuse);
+		modelShader.setVec3(l + "].specular", lights[i]->specular);
+		modelShader.setVec3(l + "].color", lights[i]->color);
 		//cout << lights[i]->ambient.x << " " << lights[i]->ambient.y << " " << lights[i]->ambient.z <<"\n" ;
 		if (lights[i]->type == 0)
 		{
 			DirectionalLight* light = dynamic_cast<DirectionalLight*>(lights[i]);
 			if (light != nullptr)
 			{
-				shader1.setVec3(l + "].direction", light->direction);
-				shader1.setFloat(l + "].constant", 1);
-				shader1.setFloat(l + "].linear", 0.0014);
-				shader1.setFloat(l + "].quadratic", 0.000007);
+				modelShader.setVec3(l + "].direction", light->direction);
+				modelShader.setFloat(l + "].constant", 1);
+				modelShader.setFloat(l + "].linear", 0.0014);
+				modelShader.setFloat(l + "].quadratic", 0.000007);
 			}
 		}
 		else if (lights[i]->type == 1)
@@ -289,10 +302,10 @@ void Level::Draw()
 			PointLight* light = dynamic_cast<PointLight*>(lights[i]);
 			if (light != nullptr)
 			{
-				shader1.setVec3(l + "].position", light->position);
-				shader1.setFloat(l + "].constant", light->constant);
-				shader1.setFloat(l + "].linear", light->linear);
-				shader1.setFloat(l + "].quadratic", light->quadratic);
+				modelShader.setVec3(l + "].position", light->position);
+				modelShader.setFloat(l + "].constant", light->constant);
+				modelShader.setFloat(l + "].linear", light->linear);
+				modelShader.setFloat(l + "].quadratic", light->quadratic);
 
 			}
 		}
@@ -301,26 +314,26 @@ void Level::Draw()
 			SpotLight* light = dynamic_cast<SpotLight*>(lights[i]);
 			if (light != nullptr)
 			{
-				shader1.setVec3(l + "].position", light->position);
-				shader1.setVec3(l + "].direction", light->direction);
-				shader1.setFloat(l + "].constant", light->constant);
-				shader1.setFloat(l + "].linear", light->linear);
-				shader1.setFloat(l + "].quadratic", light->quadratic);
-				shader1.setFloat(l + "].cutOff", light->cutOff);
-				shader1.setFloat(l + "].outerCutOff", light->outerCutOff);
+				modelShader.setVec3(l + "].position", light->position);
+				modelShader.setVec3(l + "].direction", light->direction);
+				modelShader.setFloat(l + "].constant", light->constant);
+				modelShader.setFloat(l + "].linear", light->linear);
+				modelShader.setFloat(l + "].quadratic", light->quadratic);
+				modelShader.setFloat(l + "].cutOff", light->cutOff);
+				modelShader.setFloat(l + "].outerCutOff", light->outerCutOff);
 			}
 		}
 	}
-	shader1.setInt("size", lights.size());
+	modelShader.setInt("size", lights.size());
 	/*for each (Model obj in DestructableObjects)
 	{
 		obj.Draw(modelShader);
-	}
+	}*/
 	for each (Model obj in objects)
 	{
 		obj.Draw(modelShader);
 	}
-	for each (Model enemy in enemies)
+	/*for each (Model enemy in enemies)
 	{
 		enemy.Draw(modelShader);
 	}*/
@@ -359,6 +372,7 @@ void Level::Draw()
 void Level::DrawShadowMap()
 {
 	Shader& shader = ResourceManager::GetShader("simpleDepth");
+
 	//Shader& shader1 = ResourceManager::GetShader("model");
 	shader.use();
 	for each (Cube cube in cubes)
@@ -372,12 +386,12 @@ void Level::DrawShadowMap()
 	/*for each (Model obj in DestructableObjects)
 	{
 		obj.Draw(modelShader);
-	}
+	}*/
 	for each (Model obj in objects)
 	{
-		obj.Draw(modelShader);
+		obj.Draw(shader);
 	}
-	for each (Model enemy in enemies)
+	/*for each (Model enemy in enemies)
 	{
 		enemy.Draw(modelShader);
 	}*/
@@ -495,46 +509,82 @@ Level_1::Level_1()
 	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
 	cubes.push_back(Cube(glm::vec3(0.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(4.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(4.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
 	cubes.push_back(Cube(glm::vec3(3.5f, 4.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
 	cubes.push_back(Cube(glm::vec3(3.5f, 3.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
+	cubes.push_back(Cube(glm::vec3(9.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(9.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(12.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(12.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+
+	interiors.push_back(Cube(glm::vec3(12.0f, 2.51f, -2.0f), glm::vec3(3.0f, 2.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	//interiors.push_back(Cube(glm::vec3(12.0f, 1.0f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+
 	//lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
+	
+	objects.push_back(Model("../Glitter/Resources/Objects/Sign-controls/sign.obj"));
+	objects[0].model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
+	objects[0].model = glm::translate(objects[0].model, glm::vec3(-1.0f, -0.5f, -1.5f));
+	objects[0].model = glm::scale(objects[0].model, glm::vec3(3.0f,3.0f,3.0f));
+	objects.push_back(Model("../Glitter/Resources/Objects/framed_photo/framed_photo.obj"));
+	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
+
 
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 1.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
 
-	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -2.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 3.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
+	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(5.0f, 1.0f, -2.0f), glm::vec3(0.1f, 1.0f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", false);
 }
 Level_1::Level_1(MainCharacter* mc) : Level(mc)
 {
 	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
 	cubes.push_back(Cube(glm::vec3(0.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(4.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(4.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
 	cubes.push_back(Cube(glm::vec3(3.5f, 4.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
 	cubes.push_back(Cube(glm::vec3(3.5f, 3.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
+	cubes.push_back(Cube(glm::vec3(9.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(9.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(12.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(12.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+
+	interiors.push_back(Cube(glm::vec3(12.0f, 2.51f, -2.0f), glm::vec3(3.0f, 2.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	//cubes.push_back(Cube(glm::vec3(12.0f, 1.7f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+
 	//lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
+
+	objects.push_back(Model("../Glitter/Resources/Objects/Sign-controls/sign.obj"));
+	objects[0].model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
+	objects[0].model = glm::translate(objects[0].model, glm::vec3(-1.7f, -0.5f, -1.5f));
+	objects[0].model = glm::scale(objects[0].model, glm::vec3(3.0f, 3.0f, 3.0f));
+	objects.push_back(Model("../Glitter/Resources/Objects/framed_photo/framed_photo.obj"));
+	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
+
 
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 1.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
 
-	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -2.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 3.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
-	
-	objective = new Cube(glm::vec3(5.0f, 1.0f, -2.0f), glm::vec3(0.1f, 1.0f, 3.0f), "", "", "", false);
+	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
+
+	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", false);
 }
 
 Level_1::~Level_1()

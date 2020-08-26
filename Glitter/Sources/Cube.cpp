@@ -19,47 +19,53 @@ Cube::Cube(glm::vec3 position, glm::vec3 length, string path, string name, strin
 
 void Cube::initVertices(glm::vec3 position, glm::vec3 length)
 {
-	vertices.push_back(genVertex(position																		 , glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y, position.z				), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y, position.z				), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y, position.z)			 , glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(position																		 , glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f)));
+	//back
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y, position.z				), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y, position.z				), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 0.0f))); //bottom-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(1.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(position																		 , glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 1.0f))); //top-left
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y, position.z				), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec2(0.0f, 0.0f))); //bottom-left
 
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y , position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y , position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y , position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f)));
+	//front
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y , position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y , position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f))); //bottom-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y , position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f))); //top-left
 
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y	, position.z + length.z	), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y	, position.z			), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z			), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z			), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z	), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y	, position.z + length.z	), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
+	//left 
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z	), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y , position.z			), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(position																		 , glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-left
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y , position.z			), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z	), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y , position.z + length.z	), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-right
 
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z + length.z	), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z			), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z + length.z	), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
+	//right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z			), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z			), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y , position.z + length.z	), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-left
 
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z			), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z ), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z			), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
+	//bottom
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y, position.z				), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y, position.z + length.z	), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y, position.z				), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f))); //top-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y, position.z + length.z	), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y, position.z				), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y, position.z + length.z	), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f))); //bottom-right
 
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y	, position.z			), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z			), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z + length.z	), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y - length.y	, position.z + length.z	), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y	, position.z + length.z ), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f)));
-	vertices.push_back(genVertex(glm::vec3(position.x			, position.y - length.y	, position.z			), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f)));
+	//top
+	vertices.push_back(genVertex(position																		 , glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-left
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z			), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 1.0f))); //top-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-right
+	vertices.push_back(genVertex(glm::vec3(position.x + length.x, position.y			, position.z + length.z	), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f))); //bottom-right
+	vertices.push_back(genVertex(glm::vec3(position.x			, position.y			, position.z + length.z	), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f))); //bottom-left
+	vertices.push_back(genVertex(position																		 , glm::vec3(0.0f, -1.0f, 0.0f), glm::vec2(0.0f, 1.0f))); //top-left
 }
 
 void Cube::setUpObject(string path, string name, string ext)

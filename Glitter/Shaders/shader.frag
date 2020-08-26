@@ -44,7 +44,8 @@ uniform Material material;
 uniform int size;
 uniform bool gamma;
 uniform bool light;
-uniform sampler2D shadowMap;
+uniform float far_plane;
+uniform samplerCube depthMap;
 
 // function prototypes
 vec3 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
@@ -52,7 +53,16 @@ vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light);
-float ShadowCalculation(vec4 fragPosLightSpace);
+float ShadowCalculation(vec3 fragPos);
+
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
 
 void main()
 {    
@@ -63,25 +73,27 @@ void main()
     vec3 color = texture(material.diffuse, TexCoords).rgb;
     vec3 specmap = texture(material.specular, TexCoords).rgb;
     vec3 lighting = vec3(0.0f);
-    vec3 diffuseLight = vec3(0.05f);
-    vec3 ambientLight = vec3(0.8f);
-    vec3 sumdiff = vec3(0.0f);
-    vec3 sumamb = vec3(0.0f);
+    vec3 diffuseLight = vec3(0.0f);
+    vec3 ambientLight = vec3(0.0f);
+    //vec3 sumdiff = vec3(0.0f);
+    //vec3 sumamb = vec3(0.0f);
     for (int i = 0; i < size; ++i)
     {
         lighting += BlinnPhong(Normal, FragPos, Lights[i]);
         vec3 lightDir = normalize(Lights[i].position - FragPos);
         float diff = max(dot(lightDir, Normal), 0.0);
-        sumdiff += diffuseLight * diff;
-        sumamb += ambientLight;
+        diffuseLight += Lights[i].diffuse * diff;
+        ambientLight += Lights[i].ambient;
     }
     //sumdiff /= vec3(size);
     //sumamb /= vec3(size);
 
     specmap *= lighting;
-    sumdiff *= color;
-    sumamb *= color;
-    color = specmap + sumdiff + sumamb;
+    diffuseLight *= color;
+    float shadow = ShadowCalculation(FragPos);
+    ambientLight +=(1.0 - shadow);
+    ambientLight *= color;
+    color = specmap + diffuseLight + ambientLight;
 
     if (gamma)
     {
@@ -132,39 +144,25 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
 }
 
 
-float ShadowCalculation(vec4 fragPosLightSpace)
+float ShadowCalculation(vec3 fragPos)
 {
-    // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(shadowMap, projCoords.xy).r; 
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    // calculate bias (based on depth map resolution and slope)
-    vec3 normal = normalize(Normal);
-    vec3 lightDir = normalize(Lights[0].position - FragPos);
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    // check whether current frag pos is in shadow
-    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-    // PCF
+    vec3 fragToLight = fragPos - Lights[0].position;
+    float currentDepth = length(fragToLight);
+
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for(int x = -1; x <= 1; ++x)
+    float bias = 0.15;
+    int samples = 20;
+    float viewDistance = length(viewPos - fragPos);
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+    for(int i = 0; i < samples; ++i)
     {
-        for(int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
-        }    
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= far_plane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
     }
-    shadow /= 9.0;
-    
-    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
-        
+    shadow /= float(samples);
+       
     return shadow;
 }
 
