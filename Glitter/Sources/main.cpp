@@ -48,7 +48,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(0.0f, 4.0f, 0.0f);
+glm::vec3 lightPos(30.0f, 10.0f, 0.0f);
 
 
 Cube* mouseCube = nullptr;
@@ -152,6 +152,8 @@ int main()
     shader.setInt("material.shininess", 64);
     shader.setInt("gamma", true);
 
+    modelShader.use();
+    modelShader.setInt("depthMap",2);
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
@@ -297,10 +299,15 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        modelShader.use();
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+        modelShader.setFloat("far_plane", far_plane);
         shader.use();
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
         shader.setFloat("far_plane", far_plane);
+        glActiveTexture(GL_TEXTURE0);
 
         scene->Draw();
         

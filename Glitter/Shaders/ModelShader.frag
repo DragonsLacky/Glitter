@@ -36,8 +36,21 @@ uniform Light Lights[NUM_LIGHTS];
 uniform int size;
 uniform bool gamma;
 float shininess;
+uniform float far_plane;
+uniform samplerCube depthMap;
+
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
 
 vec3 BlinnPhong(vec3 normal, vec3 fragpos, Light);
+float ShadowCalculation(vec3 fragPos);
 vec4 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
 vec4 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec4 CalcSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -63,8 +76,10 @@ void main()
         ambient += Lights[i].ambient;
     }
 
-    ambient *=color;
     diffuse *= color;
+    float shadow = ShadowCalculation(FragPos);
+    ambient +=(1.0 - shadow);
+    ambient *=color;
     color *= lighting;
 
     color += ambient;
@@ -113,6 +128,28 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
     specular *= attenuation;
     
     return diffuse + specular;
+}
+
+float ShadowCalculation(vec3 fragPos)
+{
+    vec3 fragToLight = fragPos - Lights[0].position;
+    float currentDepth = length(fragToLight);
+
+    float shadow = 0.0;
+    float bias = 0.15;
+    int samples = 20;
+    float viewDistance = length(viewPos - fragPos);
+    float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        closestDepth *= far_plane;   // undo mapping [0;1]
+        if(currentDepth - bias > closestDepth)
+            shadow += 1.0;
+    }
+    shadow /= float(samples);
+       
+    return shadow;
 }
 
 vec4 CalcDirLight(Light light, vec3 normal, vec3 viewDir)

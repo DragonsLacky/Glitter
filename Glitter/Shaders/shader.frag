@@ -47,14 +47,6 @@ uniform bool light;
 uniform float far_plane;
 uniform samplerCube depthMap;
 
-// function prototypes
-vec3 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
-vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
-vec3 CalcSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
-
-vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light);
-float ShadowCalculation(vec3 fragPos);
-
 vec3 gridSamplingDisk[20] = vec3[]
 (
    vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
@@ -63,6 +55,16 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
+
+// function prototypes
+vec3 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
+vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 CalcSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
+
+vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light);
+float ShadowCalculation(vec3 fragPos);
+
+
 
 void main()
 {    
