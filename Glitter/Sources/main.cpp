@@ -129,6 +129,7 @@ int main()
     ResourceManager::LoadShader("../Glitter/Shaders/LightShader.vert", "../Glitter/Shaders/LightShader.frag", nullptr, "lightShader");
     ResourceManager::LoadShader("../Glitter/Shaders/sDepthShader.vert", "../Glitter/Shaders/sDepthShader.frag", "../Glitter/Shaders/sDepthShader.geom", "simpleDepth");
     //ResourceManager::LoadShader("../Glitter/Shaders/ShaddowMap.vert", "../Glitter/Shaders/ShaddowMap.frag", nullptr, "depth");
+    
     Shader& shader = ResourceManager::GetShader("shader");
     Shader& modelShader = ResourceManager::GetShader("model");
     Shader& skyboxShader = ResourceManager::GetShader("skybox");
@@ -137,14 +138,6 @@ int main()
     Shader& simpleDepthShader = ResourceManager::GetShader("simpleDepth");
 
     
-    //Shader shader("Resources/Shaders/shader.vert", "Resources/Shaders/shader.frag");
-    //Shader LightShader("Resources/Shaders/LightShader.vert", "Resources/Shaders/LightShader.frag");
-    //Shader modelShader("Resources/Shaders/ModelShader.vert", "Resources/Shaders/ModelShader.frag");
-    //Shader outlineShader("Resources/Shaders/OutlineShader.vert", "Resources/Shaders/OutlineShader.frag");
-    //Shader skyboxShader("Resources/Shaders/skyboxShader.vert", "Resources/Shaders/skyboxShader.frag");
-    //screen
-    //Shader screenShader("Resources/Shaders/ScreenShader.vert", "Resources/Shaders/ScreenShader.frag");
-
     shader.use();
     shader.setInt("material.diffuse", 0);
     shader.setInt("material.specular", 1);
@@ -221,9 +214,6 @@ int main()
     Scene* scene = new Scene();
     scene->camera = camera;
     scene->level->camera = camera;
-    //AABB box = scene->level->DestCubes[0].boundingBox;
-    //Cube* cube = new Cube(glm::vec3(box.min.x, box.max.y, box.min.z), glm::vec3(box.max.x - box.min.x, -(box.min.y - box.max.y), box.max.z - box.min.z), "Resources/Textures/", "grass.jpg");
-
 
     // render loop
     // -----------

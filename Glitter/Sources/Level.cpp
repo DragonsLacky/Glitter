@@ -259,6 +259,8 @@ void Level::Draw()
 		}
 	}
 	shader.setInt("size", lights.size());
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	for each (Cube cube in cubes)
 	{
 		cube.Draw();
@@ -267,6 +269,8 @@ void Level::Draw()
 	{
 		cube.Draw();
 	}
+	glDisable(GL_CULL_FACE);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glFrontFace(GL_CW);
@@ -398,21 +402,6 @@ void Level::DrawShadowMap()
 
 	character->Draw();
 
-	for (int i = 0; i < lights.size(); i++)
-	{
-		shader.use();
-		glm::mat4 model(1.0f);
-		if (lights[i]->type == 1)
-		{
-			PointLight* light = dynamic_cast<PointLight*>(lights[i]);
-			if (light != nullptr)
-			{
-				model = glm::translate(model, light->position);
-			}
-			shader.setMat4("model", model);
-			lightCube->Draw();
-		}
-	}
 }
 
 StartScreen::StartScreen()
