@@ -84,6 +84,12 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 		character->modelState = 0;
 		character->attacked = false;
 	}
+	PointLight* light =  dynamic_cast<PointLight*>(lights[0]);
+	if (light != nullptr)
+	{
+		light->position.x = character->box().max.x;
+		light->position.y = 15.0f;
+	}
 }
 
 bool Level::Collision(AABB& box)
@@ -545,13 +551,12 @@ Level_1::Level_1(MainCharacter* mc) : Level(mc)
 	cubes.push_back(Cube(glm::vec3(12.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
 	interiors.push_back(Cube(glm::vec3(12.0f, 2.51f, -2.0f), glm::vec3(3.0f, 2.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
-	//cubes.push_back(Cube(glm::vec3(12.0f, 1.7f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	//interiors.push_back(Cube(glm::vec3(12.0f, 1.0f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
 
 	objects.push_back(Model("../Glitter/Resources/Objects/Sign-controls/sign.obj"));
 	objects[0].model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
-	objects[0].model = glm::translate(objects[0].model, glm::vec3(-1.7f, -0.5f, -1.5f));
+	objects[0].model = glm::translate(objects[0].model, glm::vec3(-1.0f, -0.5f, -1.5f));
 	objects[0].model = glm::scale(objects[0].model, glm::vec3(3.0f, 3.0f, 3.0f));
 	objects.push_back(Model("../Glitter/Resources/Objects/framed_photo/framed_photo.obj"));
 	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
@@ -561,6 +566,8 @@ Level_1::Level_1(MainCharacter* mc) : Level(mc)
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
+	
+	lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
 
@@ -611,9 +618,9 @@ Level_2::Level_2()
 
 	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
-	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
-	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
+	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
+	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg", false));
 
 
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(30.0f, 10.0f, 0.0f), 1.0, 0.0014, 0.000007));
@@ -673,8 +680,8 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 
 	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
-	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
+	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
 	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 
@@ -688,8 +695,8 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(58.7f, 3.01f, -0.5f), 1.0, 0.35, 0.44));
 	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(61.7f, 3.01f, -0.5f), 1.0, 0.35, 0.44));
 
-	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(21.5f, 8.0f, -0.5f), 1.0, 0.022, 0.0019));
-	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(38.5f, 10.0f, -0.5f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(21.5f, 10.0f, -0.5f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(38.5f, 15.0f, -0.5f), 1.0, 0.022, 0.0019));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/nightsky/");
 

@@ -48,7 +48,7 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(30.0f, 10.0f, 0.0f);
+glm::vec3 lightPos(53.1f, 1.51f, -0.5f);
 
 
 Cube* mouseCube = nullptr;
@@ -225,6 +225,14 @@ int main()
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        PointLight* light = dynamic_cast<PointLight*>(scene->level->lights[0]);
+
+        if (light != nullptr)
+        {
+            lightPos = light->position;
+        }
+
 
         float near_plane = 1.0f;
         float far_plane = 25.0f;
