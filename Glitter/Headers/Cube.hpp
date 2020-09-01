@@ -26,10 +26,12 @@ class Cube
 {
 public:
 	AABB boundingBox;
+	glm::mat4 model;
 	Cube() = default;
 	Cube(glm::vec3 position, glm::vec3 length, string path, string name, string ext, bool isSolid = true);
 	~Cube();
 	void Draw();
+	void updateModel(glm::vec3 model);
 	void updateBox(glm::vec3 model);
 	void initVertices(glm::vec3 position, glm::vec3 length);
 	void setUpObject(string path, string name, string ext); 

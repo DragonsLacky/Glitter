@@ -277,7 +277,9 @@ int main()
             simpleDepthShader.setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
         simpleDepthShader.setFloat("far_plane", far_plane);
         simpleDepthShader.setVec3("lightPos", lightPos);
+        glEnable(GL_CULL_FACE);
         scene->level->DrawShadowMap();
+        glDisable(GL_CULL_FACE);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // reset viewport
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);

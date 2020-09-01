@@ -10,6 +10,7 @@ vertex genVertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texture)
 }
 Cube::Cube(glm::vec3 position, glm::vec3 length, string path, string name, string ext, bool isSolid)
 {
+	model = glm::mat4(1.0f);
 	this->isSolid = isSolid;
 	initVertices(position, length);
 	boundingBox = AABB(glm::vec3(min(position.x, position.x + length.x), min(position.y, position.y - length.y), min(position.z, position.z + length.z)), glm::vec3(max(position.x, position.x + length.x), max(position.y, position.y - length.y), max(position.z, position.z + length.z)));
@@ -121,11 +122,15 @@ void Cube::Draw()
 
 void Cube::updateBox(glm::vec3 model)
 {
-
 	boundingBox.min = glm::vec3(boundingBox.min.x + model.x, boundingBox.min.y + model.y, boundingBox.min.z + model.z);
 	boundingBox.max = glm::vec3(boundingBox.max.x + model.x, boundingBox.max.y + model.y, boundingBox.max.z + model.z);
-
 }
+
+void Cube::updateModel(glm::vec3 model)
+{
+	this->model = glm::translate(this->model, model);
+}
+
 Cube::~Cube()
 {
 }

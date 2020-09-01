@@ -32,7 +32,7 @@ public:
 	virtual void processMovement(GLFWwindow* window, float deltaTime);
 	virtual void Draw();
 	void DrawShadowMap();
-	bool Collision(AABB& box);
+	bool Collision(AABB& box,int i = -1);
 	void CollisionBellow();
 	bool CollisionRightSide();
 	bool CollisionLeftSide();
@@ -90,6 +90,16 @@ private:
 
 };
 
+class Level_3 : public Level
+{
+public:
+	Level_3();
+	~Level_3();
+	Level_3(MainCharacter* mc);
+	virtual Level* getNextLevel();
+private:
+
+};
 
 #endif // !GAME_LEVEL
 

@@ -61,7 +61,7 @@ vec3 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
-vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light);
+vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light, vec3 color, vec3 specMap);
 float ShadowCalculation(vec3 fragPos);
 
 
@@ -71,45 +71,52 @@ void main()
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
     //vec3 result =  vec3(texture(material.diffuse, TexCoords).rgb);
-    
+
     vec3 color = texture(material.diffuse, TexCoords).rgb;
     vec3 specmap = texture(material.specular, TexCoords).rgb;
     vec3 lighting = vec3(0.0f);
-    vec3 diffuseLight = vec3(0.0f);
-    vec3 ambientLight = vec3(0.0f);
+//    vec3 diffuseLight = vec3(0.0f);
+//    vec3 ambientLight = vec3(0.0f);
     //vec3 sumdiff = vec3(0.0f);
     //vec3 sumamb = vec3(0.0f);
     for (int i = 0; i < size; ++i)
     {
-        lighting += BlinnPhong(Normal, FragPos, Lights[i]);
-        vec3 lightDir = normalize(Lights[i].position - FragPos);
-        float diff = max(dot(lightDir, Normal), 0.0);
-        diffuseLight += Lights[i].diffuse * diff;
-        ambientLight += Lights[i].ambient;
+        lighting += BlinnPhong(norm, FragPos, Lights[i], color, specmap);
+//        vec3 lightDir = normalize(Lights[i].position - FragPos);
+//        float diff = max(dot(lightDir, norm), 0.0);
+//        diffuseLight += Lights[i].diffuse * diff;
+//        ambientLight += Lights[i].ambient;
     }
-    //sumdiff /= vec3(size);
-    //sumamb /= vec3(size);
+    //diffuseLight /= vec3(size);
+    //ambientLight /= vec3(size);
 
-    specmap *= lighting;
-    diffuseLight *= color;
-    float shadow = ShadowCalculation(FragPos);
-    ambientLight +=(1.0 - shadow);
-    ambientLight *= color;
-    color = specmap + diffuseLight + ambientLight;
+
+
+    //specmap *= lighting;
+//    diffuseLight *= 1.0f;
+//    ambientLight *= color;
+
+
+    //ambientLight +=(1.0 - shadow);
+    //color = specmap + diffuseLight + ambientLight;
 
     if (gamma)
     {
-        color = pow(color, vec3(1.0f/ 2.2f));
+        lighting = pow(lighting, vec3(1.0f/ 2.2f));
     }
-    FragColor = vec4(color, 1.0f);
+    FragColor = vec4(lighting, 1.0f);
     if (light)
     {
         FragColor= vec4(vec3(100.0f),1.0f);
     }
 }
 
-vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
+vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light, vec3 color, vec3 specMap)
 {
+    
+
+    vec3 ambient = light.ambient * color;
+
     vec3 lightDir = vec3(0.0f);
     if (light.type == Directional)
     {
@@ -127,7 +134,7 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = 0.0;
     vec3 halfwayDir = normalize(lightDir + viewDir);  
-    spec = pow(max(dot(normal, halfwayDir), 0.0), 64.0);
+    spec = pow(max(dot(normal, halfwayDir), 0.0), 64);
     vec3 specular = spec * light.color;    
     // simple attenuation
     float max_distance = 1.5;
@@ -141,8 +148,9 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
     
     diffuse *= attenuation;
     specular *= attenuation;
+    float shadow = ShadowCalculation(fragPos);
     
-    return diffuse + specular;
+    return (ambient +(1.0 - shadow) * diffuse)*color + ((1.0 - shadow) * specular)*specMap;
 }
 
 

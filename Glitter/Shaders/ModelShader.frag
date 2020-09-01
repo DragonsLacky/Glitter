@@ -49,7 +49,7 @@ vec3 gridSamplingDisk[20] = vec3[]
 );
 
 
-vec3 BlinnPhong(vec3 normal, vec3 fragpos, Light);
+vec3 BlinnPhong(vec3 normal, vec3 fragpos, Light, vec3 color);
 float ShadowCalculation(vec3 fragPos);
 vec4 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
 vec4 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -64,37 +64,39 @@ void main()
     vec3 color = texture(texture_diffuse1, TexCoords).rgb;
     vec3 lighting = vec3(0.0f);
     
-    vec3 ambient = vec3(0.0f);
-    vec3 diffuse = vec3(0.0f);
+//    vec3 ambient = vec3(0.0f);
+//    vec3 diffuse = vec3(0.0f);
 
     for (int i = 0; i < size; ++i)
     {
-        lighting += BlinnPhong(Normal, FragPos, Lights[i]);
-        vec3 lightDir = normalize(Lights[i].position - FragPos);
-        float diff = max(dot(lightDir, Normal), 0.0);
-        diffuse += Lights[i].diffuse * diff;
-        ambient += Lights[i].ambient;
+        lighting += BlinnPhong(Normal, FragPos, Lights[i], color);
+//        vec3 lightDir = normalize(Lights[i].position - FragPos);
+//        float diff = max(dot(lightDir, Normal), 0.0);
+//        diffuse += Lights[i].diffuse * diff;
+//        ambient += Lights[i].ambient;
     }
 
-    diffuse *= color;
-    float shadow = ShadowCalculation(FragPos);
-    ambient +=(1.0 - shadow);
-    ambient *=color;
-    color *= lighting;
+    //diffuse *= color;
+    //float shadow = ShadowCalculation(FragPos);
+    //ambient +=(1.0 - shadow);
+    //ambient *=color;
+    //color *= lighting;
 
-    color += ambient;
-    color += diffuse;
-
+    //color += ambient;
+    //color += diffuse;
     if (gamma)
     {
-        color = pow(color, vec3(1.0f/ 2.2f));
+        lighting = pow(lighting, vec3(1.0f/ 2.2f));
     }
-    FragColor = vec4(color, 1.0f);
+    FragColor = vec4(lighting, 1.0f);
 }
 
 
-vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
+vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light, vec3 color)
 {
+    
+    vec3 ambient = light.ambient * color;
+
     vec3 lightDir = vec3(0.0f);
     if (light.type == Directional)
     {
@@ -127,7 +129,9 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light)
     diffuse *= attenuation;
     specular *= attenuation;
     
-    return diffuse + specular;
+    float shadow = ShadowCalculation(fragPos);
+
+    return (ambient + (1.0 - shadow) * (diffuse + specular))*color;
 }
 
 float ShadowCalculation(vec3 fragPos)
