@@ -40,7 +40,7 @@ MainCharacter::MainCharacter()
 
     modelState = 0;
     model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
-    model = glm::translate(model, glm::vec3(-0.5f, 0.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 0.0f));
 }
 
 void  MainCharacter::gravity()

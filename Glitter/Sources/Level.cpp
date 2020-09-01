@@ -436,7 +436,7 @@ void Level::DrawShadowMap()
 StartScreen::StartScreen()
 {
 	MouseEnabled = true;
-	Level1 = new Level_1();
+	Level1 = new Level_3();
 	StartButton = Cube(glm::vec3(-0.5f, 0.8f, 0.0f), glm::vec3(1.0f, 0.2f, 0.0f), "../Glitter/Resources/Textures/", "StartButton", ".png");
 	LevelsButton = Cube(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(1.0f, 0.2f, 0.0f), "../Glitter/Resources/Textures/", "LevelSelsectButton", ".png");
 	ExitButton = Cube(glm::vec3(-0.5f, 0.2f, 0.0f), glm::vec3(1.0f, 0.2f, 0.0f), "../Glitter/Resources/Textures/", "ExitButton", ".png");
@@ -554,7 +554,7 @@ Level_1::Level_1()
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", "",false);
 }
 Level_1::Level_1(MainCharacter* mc) : Level(mc)
 {
@@ -595,7 +595,7 @@ Level_1::Level_1(MainCharacter* mc) : Level(mc)
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", "",false);
 }
 
 Level_1::~Level_1()
@@ -640,8 +640,8 @@ Level_2::Level_2()
 
 	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
-	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
+	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
+	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
 	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 
@@ -696,7 +696,7 @@ Level_2::Level_2()
 	DestCubes.push_back(Cube(glm::vec3(33.0f, 7.7f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 	DestCubes.push_back(Cube(glm::vec3(33.0f, 7.7f, 0.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(63.2f, 1.0f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(63.2f, 1.0f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "", "", "", "",false);
 }
 
 Level_2::Level_2(MainCharacter* mc) : Level(mc)
@@ -732,8 +732,8 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 
 	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
-	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", false));
+	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
+	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
 	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 
@@ -788,7 +788,7 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 	DestCubes.push_back(Cube(glm::vec3(33.0f, 7.7f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 	DestCubes.push_back(Cube(glm::vec3(33.0f, 7.7f, 0.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(63.2f, 1.0f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(63.2f, 1.0f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "", "", "", "",false);
 }
 
 Level_2::~Level_2(){}
@@ -799,22 +799,34 @@ Level* Level_3::getNextLevel()
 }
 Level_3::Level_3()
 {
-	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(0.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(4.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(4.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(8.0f, 1.5f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(3.5f, 4.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(3.5f, 3.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(13.2f, 4.5f, -2.0f), glm::vec3(3.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
 
-	cubes.push_back(Cube(glm::vec3(9.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(9.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(18.7f, 1.2f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
 
-	cubes.push_back(Cube(glm::vec3(12.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(12.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(22.5f, 1.2f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
 
-	interiors.push_back(Cube(glm::vec3(12.0f, 2.51f, -2.0f), glm::vec3(3.0f, 2.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(24.7f, 1.2f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
+
+	cubes.push_back(Cube(glm::vec3(27.7f, 2.0f, -2.0f), glm::vec3(8.0f, 3.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(35.7f, 1.5f, -2.0f), glm::vec3(4.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(39.7f, 1.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	
+	cubes.push_back(Cube(glm::vec3(39.7f, 4.51f, -2.0f), glm::vec3(10.0f, 0.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(52.2f, 1.6f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(55.2f, 1.6f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+
+	interiors.push_back(Cube(glm::vec3(39.7f, 4.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg","",false));
+
+
+
 	//interiors.push_back(Cube(glm::vec3(12.0f, 1.0f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
 	//lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
@@ -832,30 +844,42 @@ Level_3::Level_3()
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
 
-	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
+	skybox = CubeMap("../Glitter/Resources/Textures/woodBox/");
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(56.2f, 1.5f, -2.0f), glm::vec3(1.0f, 3.5f, 3.0f), "", "", "", "", false);
 }
 Level_3::Level_3(MainCharacter* mc) : Level(mc)
 {
-	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(0.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(0.0f, 0.0f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.7f, -2.0f), glm::vec3(4.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(3.0f, 0.2f, -2.0f), glm::vec3(4.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(8.0f, 1.5f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(3.5f, 4.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(3.5f, 3.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(13.2f, 4.5f, -2.0f), glm::vec3(3.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
 
-	cubes.push_back(Cube(glm::vec3(9.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(9.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(18.7f, 1.2f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
 
-	cubes.push_back(Cube(glm::vec3(12.0f, 0.0f, -2.0f), glm::vec3(3.0f, 0.5f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
-	cubes.push_back(Cube(glm::vec3(12.0f, -0.5f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(22.5f, 1.2f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
 
-	interiors.push_back(Cube(glm::vec3(12.0f, 2.51f, -2.0f), glm::vec3(3.0f, 2.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(24.7f, 1.2f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "drawer", ".jpg", "wood"));
+
+	cubes.push_back(Cube(glm::vec3(27.7f, 2.0f, -2.0f), glm::vec3(8.0f, 3.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(35.7f, 1.5f, -2.0f), glm::vec3(4.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(39.7f, 1.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(39.7f, 4.51f, -2.0f), glm::vec3(10.0f, 0.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(52.2f, 1.6f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+
+	cubes.push_back(Cube(glm::vec3(55.2f, 1.6f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
+
+	interiors.push_back(Cube(glm::vec3(39.7f, 4.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg", "", false));
+
+
+
 	//interiors.push_back(Cube(glm::vec3(12.0f, 1.0f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
 	//lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
@@ -873,9 +897,9 @@ Level_3::Level_3(MainCharacter* mc) : Level(mc)
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
 
-	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
+	skybox = CubeMap("../Glitter/Resources/Textures/woodBox/");
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", false);
+	objective = new Cube(glm::vec3(56.2f, 1.5f, -2.0f), glm::vec3(1.0f, 3.5f, 3.0f), "", "", "", "", false);
 }
