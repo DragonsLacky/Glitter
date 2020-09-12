@@ -9,7 +9,7 @@
 // Instantiate static variables
 std::map<std::string, Texture>    ResourceManager::Textures;
 std::map<std::string, Shader>       ResourceManager::Shaders;
-
+std::string ResourceManager::in_use;
 
 Shader ResourceManager::LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name)
 {
@@ -20,6 +20,13 @@ Shader ResourceManager::LoadShader(const char* vShaderFile, const char* fShaderF
 Shader ResourceManager::GetShader(std::string name)
 {
     return Shaders[name];
+}
+
+Shader ResourceManager::getShaderInUse() {
+    return Shaders[in_use];
+}
+void ResourceManager::setShaderInUse(std::string shader) {
+    in_use = shader;
 }
 
 Texture ResourceManager::LoadTexture(const char* file, /*bool alpha,*/ std::string name)

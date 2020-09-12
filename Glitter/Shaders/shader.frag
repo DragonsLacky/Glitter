@@ -46,6 +46,7 @@ uniform bool gamma;
 uniform bool light;
 uniform float far_plane;
 uniform samplerCube depthMap;
+uniform vec3 lghtColor;
 
 vec3 gridSamplingDisk[20] = vec3[]
 (
@@ -107,7 +108,7 @@ void main()
     FragColor = vec4(lighting, 1.0f);
     if (light)
     {
-        FragColor= vec4(vec3(100.0f),1.0f);
+        FragColor= vec4(lghtColor*255,1.0f);
     }
 }
 
@@ -158,6 +159,9 @@ float ShadowCalculation(vec3 fragPos)
 {
     vec3 fragToLight = fragPos - Lights[0].position;
     float currentDepth = length(fragToLight);
+    //float closestDepth = texture(depthMap, fragToLight).r;
+    //closestDepth *= far_plane;
+
 
     float shadow = 0.0;
     float bias = 0.15;
@@ -173,6 +177,8 @@ float ShadowCalculation(vec3 fragPos)
     }
     shadow /= float(samples);
        
+    // FragColor = vec4(vec3(closestDepth / far_plane), 1.0);    
+
     return shadow;
 }
 

@@ -21,10 +21,13 @@ public:
     // resource storage
     static std::map<std::string, Shader> Shaders;
     static std::map<std::string, Texture> Textures;
+    static std::string in_use;
     // loads (and generates) a shader program from file loading vertex, fragment (and geometry) shader's source code. If gShaderFile is not nullptr, it also loads a geometry shader
     static Shader    LoadShader(const char* vShaderFile, const char* fShaderFile, const char* gShaderFile, std::string name);
     // retrieves a stored sader
     static Shader    GetShader(std::string name);
+    static Shader getShaderInUse();
+    static void setShaderInUse(std::string shader);
     // loads (and generates) a texture from file
     static Texture LoadTexture(const char* file, std::string name);
     //static Texture loadCubemap(std::vector<std::string> faces);

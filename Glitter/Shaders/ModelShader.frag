@@ -147,7 +147,7 @@ float ShadowCalculation(vec3 fragPos)
     for(int i = 0; i < samples; ++i)
     {
         float closestDepth = texture(depthMap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-        closestDepth *= far_plane;   // undo mapping [0;1]
+        closestDepth *= far_plane;   
         if(currentDepth - bias > closestDepth)
             shadow += 1.0;
     }

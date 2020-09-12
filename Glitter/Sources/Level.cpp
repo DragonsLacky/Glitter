@@ -87,7 +87,7 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 	PointLight* light =  dynamic_cast<PointLight*>(lights[0]);
 	if (light != nullptr)
 	{
-		light->position.x = character->box().max.x;
+		light->position.x = character->box().max.x - 1.0;
 		light->position.y = 15.0f;
 	}
 }
@@ -221,6 +221,7 @@ void Level::CollisionBellow()
 			box.min.z = box.min.z + 0.1;
 			box.max.z = box.max.z - 0.1;
 			intersects = Collision(box, i);
+			intersects = Collision(box, i);
 			if (!intersects)
 			{
 				DestCubes[i].updateModel(glm::vec3(0.0f, -0.0095995f, 0.0f));
@@ -293,6 +294,7 @@ void Level::Draw()
 	shader.setInt("size", lights.size());
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+	
 	for each (Cube cube in cubes)
 	{
 		shader.setMat4("model", cube.model);
@@ -316,6 +318,7 @@ void Level::Draw()
 	glDisable(GL_CULL_FACE);
 	
 	modelShader.use();
+	ResourceManager::setShaderInUse("model");
 	modelShader.setBool("gamma", false);
 	for (int i = 0; i < lights.size(); i++)
 	{
@@ -397,6 +400,7 @@ void Level::Draw()
 				model = glm::translate(model, light->position);
 			}
 			lightShader.setMat4("model", model);
+			lightShader.setVec3("lghtColor",light->color);
 			lightCube->Draw();
 		}
 	}
@@ -407,8 +411,10 @@ void Level::Draw()
 void Level::DrawShadowMap()
 {
 	Shader& shader = ResourceManager::GetShader("simpleDepth");
-
-	//Shader& shader1 = ResourceManager::GetShader("model");
+	ResourceManager::setShaderInUse("simpleDepth");
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_BACK);
+	glCullFace(GL_CW);
 	shader.use();
 	for each (Cube cube in cubes)
 	{
@@ -430,6 +436,7 @@ void Level::DrawShadowMap()
 	}
 
 	character->Draw();
+	glDisable(GL_CULL_FACE);
 
 }
 
@@ -816,14 +823,14 @@ Level_3::Level_3()
 	cubes.push_back(Cube(glm::vec3(35.7f, 1.5f, -2.0f), glm::vec3(4.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 	cubes.push_back(Cube(glm::vec3(39.7f, 1.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
-	
+
 	cubes.push_back(Cube(glm::vec3(39.7f, 4.51f, -2.0f), glm::vec3(10.0f, 0.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 	cubes.push_back(Cube(glm::vec3(52.2f, 1.6f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 	cubes.push_back(Cube(glm::vec3(55.2f, 1.6f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "grass", ".jpg"));
 
-	interiors.push_back(Cube(glm::vec3(39.7f, 4.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg","",false));
+	interiors.push_back(Cube(glm::vec3(39.7f, 4.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg", "", false));
 
 
 
@@ -840,9 +847,10 @@ Level_3::Level_3()
 
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(14.45f, 3.2f, 0.0f), 1.0, 0.045, 0.0075));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(23.0f, 6.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(39.6f, 4.76f, 0.0f), 1.0, 0.014, 0.0007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(44.7f, 4.55f, 0.0f), 1.0, 0.045, 0.0075));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/woodBox/");
 
@@ -892,9 +900,9 @@ Level_3::Level_3(MainCharacter* mc) : Level(mc)
 	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
 
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 0.0f, 0.0f), 1.0, 0.0014, 0.000007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(14.45f, 3.2f, 0.0f), 1.0, 0.045, 0.0075));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(23.0f, 5.0f, 0.0f), 1.0, 0.022, 0.0019));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/woodBox/");

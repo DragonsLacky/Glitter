@@ -133,7 +133,7 @@ void MainCharacter::resetModel()
 
 void MainCharacter::Draw()
 {
-    Shader& shader = ResourceManager::GetShader("model");
+    Shader& shader = ResourceManager::getShaderInUse();
     character[modelState].model = model;
     character[modelState].Draw(shader);
 }

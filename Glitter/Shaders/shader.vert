@@ -11,11 +11,20 @@ out vec2 TexCoords;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform bool reverse_normal;
 
 void main()
 {
+    if(reverse_normal)
+    {
+        Normal = mat3(transpose(inverse(model))) * (-1.0 *aNormal); 
+    }
+    else
+    {
+        Normal = mat3(transpose(inverse(model))) * aNormal;
+    }
     TexCoords = aTexCoords;
     FragPos = vec3(model * vec4(aPos, 1.0));
-    Normal = mat3(transpose(inverse(model))) * aNormal;  
     gl_Position = projection * view * model * vec4(aPos, 1.0f);
+
 }
