@@ -517,7 +517,7 @@ void Level::DrawShadowMapD()
 StartScreen::StartScreen()
 {
 	MouseEnabled = true;
-	Level1 = new Level_3();
+	Level1 = new Level_1();
 	StartButton = Cube(glm::vec3(-0.5f, 0.8f, 0.0f), glm::vec3(1.0f, 0.2f, 0.0f), "../Glitter/Resources/Textures/", "StartButton", ".png");
 	LevelsButton = Cube(glm::vec3(-0.5f, 0.5f, 0.0f), glm::vec3(1.0f, 0.2f, 0.0f), "../Glitter/Resources/Textures/", "LevelSelsectButton", ".png");
 	ExitButton = Cube(glm::vec3(-0.5f, 0.2f, 0.0f), glm::vec3(1.0f, 0.2f, 0.0f), "../Glitter/Resources/Textures/", "ExitButton", ".png");
