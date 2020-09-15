@@ -38,6 +38,7 @@ uniform bool gamma;
 float shininess;
 uniform float far_plane;
 uniform samplerCube depthMap;
+uniform int l;
 
 vec3 gridSamplingDisk[20] = vec3[]
 (
@@ -55,6 +56,7 @@ vec4 CalcDirLight(Light light, vec3 normal, vec3 viewDir);
 vec4 CalcPointLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec4 CalcSpotLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
+
 void main()
 {   
     vec3 norm = normalize(Normal);
@@ -63,27 +65,12 @@ void main()
     
     vec3 color = texture(texture_diffuse1, TexCoords).rgb;
     vec3 lighting = vec3(0.0f);
-    
-//    vec3 ambient = vec3(0.0f);
-//    vec3 diffuse = vec3(0.0f);
 
     for (int i = 0; i < size; ++i)
     {
         lighting += BlinnPhong(Normal, FragPos, Lights[i], color);
-//        vec3 lightDir = normalize(Lights[i].position - FragPos);
-//        float diff = max(dot(lightDir, Normal), 0.0);
-//        diffuse += Lights[i].diffuse * diff;
-//        ambient += Lights[i].ambient;
     }
 
-    //diffuse *= color;
-    //float shadow = ShadowCalculation(FragPos);
-    //ambient +=(1.0 - shadow);
-    //ambient *=color;
-    //color *= lighting;
-
-    //color += ambient;
-    //color += diffuse;
     if (gamma)
     {
         lighting = pow(lighting, vec3(1.0f/ 2.2f));
@@ -125,10 +112,18 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light, vec3 color)
     }
     float attenuation = 1.0 / (light.constant + light.linear * distance + 
   			     light.quadratic * (distance * distance)); //(light.constant + (gamma ? light.quadratic * distance * distance : light.linear * distance));
-    
-    diffuse *= attenuation;
-    specular *= attenuation;
-    
+    float intensity = 1.0f;
+    if(light.type == Spotlight)
+    {
+        float theta = dot(lightDir, normalize(-light.direction)); 
+        float epsilon = light.cutOff - light.outerCutOff;
+        intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+        intensity *= 10;
+        ambient *= intensity;
+    }
+    diffuse *= attenuation * intensity;
+    specular *= attenuation *intensity;
+
     float shadow = ShadowCalculation(fragPos);
 
     return (ambient + (1.0 - shadow) * (diffuse + specular))*color;
@@ -136,7 +131,7 @@ vec3 BlinnPhong(vec3 normal, vec3 fragPos, Light light, vec3 color)
 
 float ShadowCalculation(vec3 fragPos)
 {
-    vec3 fragToLight = fragPos - Lights[0].position;
+    vec3 fragToLight = fragPos - Lights[l].position;
     float currentDepth = length(fragToLight);
 
     float shadow = 0.0;

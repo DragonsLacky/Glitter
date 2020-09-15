@@ -81,14 +81,21 @@ void Level::processMovement(GLFWwindow* window, float deltaTime)
 	}
 	if (glfwGetKey(window, GLFW_KEY_I) == GLFW_RELEASE && character->attacked)
 	{
-		character->modelState = 0;
+		if (CollisionAbove()) 
+		{
+			character->modelState = 3;
+		}
+		else 
+		{
+			character->modelState = 0;
+		}
 		character->attacked = false;
 	}
 	PointLight* light =  dynamic_cast<PointLight*>(lights[0]);
 	if (light != nullptr)
 	{
-		light->position.x = character->box().max.x - 1.0;
-		light->position.y = 15.0f;
+		//light->position.x = character->box().max.x - 2.0;
+		//light->position.y = 4.0f;
 	}
 }
 
@@ -310,11 +317,13 @@ void Level::Draw()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glFrontFace(GL_CW);
+	shader.setBool("reverse_normal", true);
 	for each (Cube cube in interiors)
 	{
 		shader.setMat4("model", cube.model);
 		cube.Draw();
 	}
+	shader.setBool("reverse_normal", false);
 	glDisable(GL_CULL_FACE);
 	
 	modelShader.use();
@@ -403,7 +412,18 @@ void Level::Draw()
 			lightShader.setVec3("lghtColor",light->color);
 			lightCube->Draw();
 		}
+		else if (lights[i]->type == 2) {
+			SpotLight* light = dynamic_cast<SpotLight*>(lights[i]);
+			if (light != nullptr)
+			{
+				model = glm::translate(model, light->position);
+			}
+			lightShader.setMat4("model", model);
+			lightShader.setVec3("lghtColor", light->color);
+			lightCube->Draw();
+		}
 	}
+	lightShader.setBool("light", false);
 	glDisable(GL_CULL_FACE);
 	skybox.Draw();
 }
@@ -421,6 +441,60 @@ void Level::DrawShadowMap()
 		shader.setMat4("model", cube.model);
 		cube.Draw();
 	}
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CW);
+	shader.setBool("reverse_normal", true);
+	for each (Cube cube in interiors)
+	{
+		shader.setMat4("model", cube.model);
+		cube.Draw();
+	}
+	shader.setBool("reverse_normal", false);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
+	for each (Cube cube in DestCubes)
+	{
+		shader.setMat4("model", cube.model);
+		cube.Draw();
+	}
+	/*for each (Model obj in DestructableObjects)
+	{
+		obj.Draw(modelShader);
+	}*/
+	for each (Model obj in objects)
+	{
+		obj.Draw(shader);
+	}
+
+	character->Draw();
+	glDisable(GL_CULL_FACE);
+
+}
+
+void Level::DrawShadowMapD()
+{
+	Shader& shader = ResourceManager::GetShader("depthmap");
+	ResourceManager::setShaderInUse("depthmap");
+	glEnable(GL_CULL_FACE);
+	glFrontFace(GL_BACK);
+	glCullFace(GL_CW);
+	shader.use();
+	for each (Cube cube in cubes)
+	{
+		shader.setMat4("model", cube.model);
+		cube.Draw();
+	}
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_FRONT);
+	glFrontFace(GL_CW);
+	for each (Cube cube in interiors)
+	{
+		shader.setMat4("model", cube.model);
+		cube.Draw();
+	}
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
 	for each (Cube cube in DestCubes)
 	{
 		shader.setMat4("model", cube.model);
@@ -552,10 +626,10 @@ Level_1::Level_1()
 	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
 
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(-0.1f, 0.0f, 0.0f), 1.0, 0.0014, 0.000007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 7.0f, 0.0f), 1.0, 0.045, 0.0075));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.6f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.55f, -0.5f), 1.0, 0.014, 0.0007));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
 
@@ -593,16 +667,16 @@ Level_1::Level_1(MainCharacter* mc) : Level(mc)
 	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
 
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.5f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 3.0f, 0.0f), 1.0, 0.022, 0.0019));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(-0.1f, 0.0f, 0.0f), 1.0, 0.0014, 0.000007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(1.0f, 7.0f, 0.0f), 1.0, 0.045, 0.0075));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(4.0f, 2.6f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.55f, -0.5f), 1.0, 0.014, 0.0007));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/skybox/");
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", "",false);
+	objective = new Cube(glm::vec3(14.0f, 1.5f, -2.0f), glm::vec3(1.0f, 1.5f, 3.0f), "", "", "", "", false);
 }
 
 Level_1::~Level_1()
@@ -645,21 +719,24 @@ Level_2::Level_2()
 
 	cubes.push_back(Cube(glm::vec3(50.2f, 3.0f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(56.2f, 3.1f, -2.0f), glm::vec3(8.0f, 0.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
 	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
-	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	interiors.push_back(Cube(glm::vec3(56.2f, 3.0f, -2.0f), glm::vec3(8.0f, 3.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 6.0f, 0.0f), 1.0, 0.0014, 0.000007));
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(8.5f, 1.51f, -0.5f), 1.0, 0.35, 0.44));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(11.5f, 1.51f, -0.5f), 1.0, 0.35, 0.44));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(8.5f, 1.5f, -0.5f), 1.0, 0.35, 0.44, glm::cos(glm::radians(18.5f)), glm::cos(glm::radians(30.0f))));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(11.5f, 1.5f, -0.5f), 1.0, 0.35, 0.44, glm::cos(glm::radians(18.5f)), glm::cos(glm::radians(30.0f))));
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(53.1f, 1.51f, -0.5f), 1.0, 0.35, 0.44));
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(58.7f, 3.01f, -0.5f), 1.0, 0.35, 0.44));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(58.7f, 3.01f, -0.5f), 1.0, 0.09, 0.032, glm::cos(glm::radians(14.0f)), glm::cos(glm::radians(25.0f))));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(61.7f, 3.01f, -0.5f), 1.0, 0.09, 0.032, glm::cos(glm::radians(14.0f)), glm::cos(glm::radians(25.0f))));
+
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(61.7f, 3.01f, -0.5f), 1.0, 0.35, 0.44));
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(21.5f, 10.0f, -0.5f), 1.0, 0.022, 0.0019));
@@ -737,21 +814,24 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 
 	cubes.push_back(Cube(glm::vec3(50.2f, 3.0f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	cubes.push_back(Cube(glm::vec3(56.2f, 3.1f, -2.0f), glm::vec3(8.0f, 0.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
-	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
-	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt",false));
-	interiors.push_back(Cube(glm::vec3(56.2f, 3.01f, -2.0f), glm::vec3(8.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
+	interiors.push_back(Cube(glm::vec3(6.0f, 1.51f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt", false));
+	interiors.push_back(Cube(glm::vec3(50.2f, 1.51f, -2.0f), glm::vec3(6.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg", "dirt", false));
+	interiors.push_back(Cube(glm::vec3(56.2f, 3.0f, -2.0f), glm::vec3(8.0f, 3.1f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg"));
 
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 6.0f, 0.0f), 1.0, 0.0014, 0.000007));
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(8.5f, 1.51f, -0.5f), 1.0, 0.35, 0.44));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(11.5f, 1.51f, -0.5f), 1.0, 0.35, 0.44));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(8.5f, 1.5f, -0.5f), 1.0, 0.35, 0.44, glm::cos(glm::radians(18.5f)), glm::cos(glm::radians(30.0f))));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(11.5f, 1.5f, -0.5f), 1.0, 0.35, 0.44, glm::cos(glm::radians(18.5f)), glm::cos(glm::radians(30.0f))));
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(53.1f, 1.51f, -0.5f), 1.0, 0.35, 0.44));
 
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(58.7f, 3.01f, -0.5f), 1.0, 0.35, 0.44));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(58.7f, 3.01f, -0.5f), 1.0, 0.09, 0.032, glm::cos(glm::radians(14.0f)), glm::cos(glm::radians(25.0f))));
+	lights.push_back(new SpotLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 2, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(61.7f, 3.01f, -0.5f), 1.0, 0.09, 0.032, glm::cos(glm::radians(14.0f)), glm::cos(glm::radians(25.0f))));
+
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(61.7f, 3.01f, -0.5f), 1.0, 0.35, 0.44));
 
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(21.5f, 10.0f, -0.5f), 1.0, 0.022, 0.0019));
@@ -759,7 +839,7 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 
 	cubes.push_back(Cube(glm::vec3(56.2f, 0.0f, -2.0f), glm::vec3(8.0f, 1.5f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
 
-	
+
 	skybox = CubeMap("../Glitter/Resources/Textures/nightsky/");
 
 	DestCubes.push_back(Cube(glm::vec3(5.0f, 1.0f, -2.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
@@ -795,7 +875,7 @@ Level_2::Level_2(MainCharacter* mc) : Level(mc)
 	DestCubes.push_back(Cube(glm::vec3(33.0f, 7.7f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 	DestCubes.push_back(Cube(glm::vec3(33.0f, 7.7f, 0.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(63.2f, 1.0f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "", "", "", "",false);
+	objective = new Cube(glm::vec3(63.2f, 1.0f, -2.0f), glm::vec3(1.0f, 1.0f, 3.0f), "", "", "", "", false);
 }
 
 Level_2::~Level_2(){}
@@ -832,23 +912,9 @@ Level_3::Level_3()
 
 	interiors.push_back(Cube(glm::vec3(39.7f, 4.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg", "", false));
 
-
-
-	//interiors.push_back(Cube(glm::vec3(12.0f, 1.0f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
-
-	//lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
-
-	objects.push_back(Model("../Glitter/Resources/Objects/Sign-controls/sign.obj"));
-	objects[0].model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
-	objects[0].model = glm::translate(objects[0].model, glm::vec3(-1.0f, -0.5f, -1.5f));
-	objects[0].model = glm::scale(objects[0].model, glm::vec3(3.0f, 3.0f, 3.0f));
-	objects.push_back(Model("../Glitter/Resources/Objects/framed_photo/framed_photo.obj"));
-	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
-
-
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(14.45f, 3.2f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(23.0f, 6.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(23.0f, 6.0f, 0.0f), 1.0, 0.0014, 0.000007));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(39.6f, 4.76f, 0.0f), 1.0, 0.014, 0.0007));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(44.7f, 4.55f, 0.0f), 1.0, 0.045, 0.0075));
 
@@ -856,7 +922,7 @@ Level_3::Level_3()
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(56.2f, 1.5f, -2.0f), glm::vec3(1.0f, 3.5f, 3.0f), "", "", "", "", false);
+	objective = new Cube(glm::vec3(57.2f, 10.0f, -2.0f), glm::vec3(1.0f, 10.0f, 3.0f), "", "", "", "", false);
 }
 Level_3::Level_3(MainCharacter* mc) : Level(mc)
 {
@@ -886,28 +952,15 @@ Level_3::Level_3(MainCharacter* mc) : Level(mc)
 
 	interiors.push_back(Cube(glm::vec3(39.7f, 4.5f, -2.0f), glm::vec3(10.0f, 3.0f, 3.0f), "../Glitter/Resources/Textures/", "wood", ".jpg", "", false));
 
-
-
-	//interiors.push_back(Cube(glm::vec3(12.0f, 1.0f, -2.0f), glm::vec3(3.0f, 1.0f, 3.0f), "../Glitter/Resources/Textures/", "dirt", ".jpg"));
-
-	//lights.push_back(new DirectionalLight(glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), glm::vec3(1.0f, 1.0f, 1.0f) , 0, glm::vec3(-0.2f, -1.0f, -0.2f)));
-
-	objects.push_back(Model("../Glitter/Resources/Objects/Sign-controls/sign.obj"));
-	objects[0].model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0, -1, 0));
-	objects[0].model = glm::translate(objects[0].model, glm::vec3(-1.0f, -0.5f, -1.5f));
-	objects[0].model = glm::scale(objects[0].model, glm::vec3(3.0f, 3.0f, 3.0f));
-	objects.push_back(Model("../Glitter/Resources/Objects/framed_photo/framed_photo.obj"));
-	objects[1].model = glm::translate(glm::mat4(1.0f), glm::vec3(13.5f, 1.5f, -1.99f));
-
-
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 0.0f, 0.0f), 1.0, 0.0014, 0.000007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(0.0f, 2.0f, 0.0f), 1.0, 0.0014, 0.000007));
 	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(14.45f, 3.2f, 0.0f), 1.0, 0.045, 0.0075));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(23.0f, 5.0f, 0.0f), 1.0, 0.022, 0.0019));
-	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(13.5f, 2.51f, -0.5f), 1.0, 0.014, 0.0007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(23.0f, 6.0f, 0.0f), 1.0, 0.022, 0.0019));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1, glm::vec3(39.6f, 4.76f, 0.0f), 1.0, 0.014, 0.0007));
+	lights.push_back(new PointLight(glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.8f, 0.8f, 0.8f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 0.0f), 1, glm::vec3(44.7f, 4.55f, 0.0f), 1.0, 0.045, 0.0075));
 
 	skybox = CubeMap("../Glitter/Resources/Textures/woodBox/");
 
 	DestCubes.push_back(Cube(glm::vec3(2.0f, 1.0f, -1.0f), glm::vec3(glm::vec3(1.0f, 1.0f, 1.0f)), "../Glitter/Resources/Textures/", "container2", ".png"));
 
-	objective = new Cube(glm::vec3(56.2f, 1.5f, -2.0f), glm::vec3(1.0f, 3.5f, 3.0f), "", "", "", "", false);
+	objective = new Cube(glm::vec3(57.2f, 10.0f, -2.0f), glm::vec3(1.0f, 10.0f, 3.0f), "", "", "", "", false);
 }

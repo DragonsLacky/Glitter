@@ -32,6 +32,7 @@ public:
 	virtual void processMovement(GLFWwindow* window, float deltaTime);
 	virtual void Draw();
 	void DrawShadowMap();
+	void DrawShadowMapD();
 	bool Collision(AABB& box,int i = -1);
 	void CollisionBellow();
 	bool CollisionRightSide();

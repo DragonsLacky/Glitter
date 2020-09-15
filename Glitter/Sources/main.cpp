@@ -2,8 +2,6 @@
 #include "glitter.hpp"
 #include "Shader.hpp"
 #include "Camera.hpp"
-//#include "../../Build/Model.hpp"
-//#include "../../Build/Cube.hpp"
 #include "Scene.hpp"
 
 
@@ -24,19 +22,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window, Scene* scene);
 unsigned int loadTexture(const char* path);
-
+glm::vec3 getMinLightSource(Scene* scene);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
-
-//jump-crouch
-bool pressedBeforeJump = false;
-bool pressedBeforeCrouch = false;
-bool finishedJump = true;
 bool dead = false;
-int numberOfJumpFrames = 0;
-int numJumps = 0;
-
 
 //camera
 Camera* camera =new Camera(glm::vec3(-1.2f, 2.0f, 6.0f));
@@ -48,11 +38,12 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(53.1f, 1.51f, -0.5f);
-
+glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 
 Cube* mouseCube = nullptr;
 glm::mat4 mouseModel;
+
+int LightIndex;
 
 int main()
 {
@@ -64,9 +55,9 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
 
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+    #ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
 
     // glfw window creation
     // --------------------
@@ -128,25 +119,29 @@ int main()
     ResourceManager::LoadShader("../Glitter/Shaders/Basic.vert", "../Glitter/Shaders/Basic.frag", nullptr ,"basic");
     ResourceManager::LoadShader("../Glitter/Shaders/LightShader.vert", "../Glitter/Shaders/LightShader.frag", nullptr, "lightShader");
     ResourceManager::LoadShader("../Glitter/Shaders/sDepthShader.vert", "../Glitter/Shaders/sDepthShader.frag", "../Glitter/Shaders/sDepthShader.geom", "simpleDepth");
-    //ResourceManager::LoadShader("../Glitter/Shaders/ShaddowMap.vert", "../Glitter/Shaders/ShaddowMap.frag", nullptr, "depth");
-    
+    ResourceManager::LoadShader("../Glitter/Shaders/ShaddowMap.vert", "../Glitter/Shaders/ShaddowMap.frag", nullptr, "depthmap");
+
+
     Shader& shader = ResourceManager::GetShader("shader");
     Shader& modelShader = ResourceManager::GetShader("model");
     Shader& skyboxShader = ResourceManager::GetShader("skybox");
     Shader& screenShader = ResourceManager::GetShader("screen");
     Shader& basicShader = ResourceManager::GetShader("basic");
     Shader& simpleDepthShader = ResourceManager::GetShader("simpleDepth");
+    Shader& depthmapShader = ResourceManager::GetShader("depthmap");
 
     
     shader.use();
     shader.setInt("material.diffuse", 0);
     shader.setInt("material.specular", 1);
     shader.setInt("depthMap", 2);
+    shader.setInt("depthMapD", 3);
     shader.setInt("material.shininess", 64);
     shader.setInt("gamma", true);
 
     modelShader.use();
     modelShader.setInt("depthMap",2);
+    modelShader.setInt("depthMapD", 3);
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
@@ -158,9 +153,9 @@ int main()
 
     basicShader.use();
     basicShader.setInt("texture1", 0);
-    
-    //Cube light(glm::vec3(-0.6f, 0.6f, -0.1f), glm::vec3(0.2f, 0.2f, 0.2f), "../Glitter/Textures/", "light", ".jpg");
-    
+       
+    depthmapShader.use();
+    depthmapShader.setMat4("model", glm::mat4(1.0f));
     // framebuffer configuration
     // -------------------------
     unsigned int framebuffer;
@@ -208,6 +203,31 @@ int main()
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // configure depth map FBO - directional
+   // -----------------------
+    unsigned int depthMapFBOD;
+    glGenFramebuffers(1, &depthMapFBOD);
+    // create depth cubemap texture
+    unsigned int depthmap;
+    glGenTextures(1, &depthmap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthmap);
+    for (unsigned int i = 0; i < 6; ++i)
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBOD);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthmap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     mouseCube = new Cube(glm::vec3(-0.01f, -0.01f, 0.0f), glm::vec3(0.03f, 0.04f, 0.0f), "../Glitter/Resources/Textures/", "cursor", ".png");
     mouseModel = glm::mat4(1.0f);
 
@@ -223,21 +243,18 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        // input
+        // -----
+        processInput(window, scene);
+
+        lightPos = getMinLightSource(scene);
+
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        PointLight* light = dynamic_cast<PointLight*>(scene->level->lights[0]);
-
-        if (light != nullptr)
-        {
-            lightPos = light->position;
-        }
-
 
         float near_plane = 1.0f;
         float far_plane = 25.0f;
         glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT, near_plane, far_plane);
-        //lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
         std::vector<glm::mat4> shadowTransforms;
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
@@ -245,28 +262,6 @@ int main()
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
         shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = camera->GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-        // Cubes
-        shader.use();
-        shader.setMat4("model", model);
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
-        shader.setVec3("viewPos", camera->Position);
-
-        // model
-        modelShader.use();
-        modelShader.setMat4("view", view);
-        modelShader.setMat4("projection", projection);
-
-        // skybox
-        skyboxShader.use();
-        view = glm::mat4(glm::mat3(camera->GetViewMatrix()));
-        skyboxShader.setMat4("view", view);
-        skyboxShader.setMat4("projection", projection);
 
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
@@ -280,6 +275,15 @@ int main()
         glEnable(GL_CULL_FACE);
         scene->level->DrawShadowMap();
         glDisable(GL_CULL_FACE);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBOD);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(glm::vec3(-2.0f, 4.0f, -1.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+        depthmapShader.use();
+        depthmapShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        scene->level->DrawShadowMapD();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         // reset viewport
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -287,26 +291,47 @@ int main()
 
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        // input
-        // -----
-        processInput(window, scene);
+        
         // render
         // ------
         //glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        modelShader.use();
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-        modelShader.setFloat("far_plane", far_plane);
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = camera->GetViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(camera->Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+        // Cubes
         shader.use();
+        shader.setMat4("model", model);
+        shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+        shader.setVec3("lightPos", lightPos);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+        shader.setVec3("viewPos", camera->Position);
+        shader.setFloat("far_plane", far_plane);
+        shader.setInt("l", LightIndex);
+
+        // model
+        modelShader.use();
+        modelShader.setMat4("view", view);
+        modelShader.setMat4("projection", projection);
+        modelShader.setFloat("far_plane", far_plane);
+        modelShader.setInt("l", LightIndex);
+
+        // skybox
+        skyboxShader.use();
+        view = glm::mat4(glm::mat3(camera->GetViewMatrix()));
+        skyboxShader.setMat4("view", view);
+        skyboxShader.setMat4("projection", projection);
+
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
-        shader.setFloat("far_plane", far_plane);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, depthmap);
         glActiveTexture(GL_TEXTURE0);
 
         scene->Draw();
@@ -320,9 +345,6 @@ int main()
         basicShader.setMat4("model", model);
 
         //glEnable(GL_FRAMEBUFFER_SRGB);
-
-        //shader.use();
-        //light.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST); // disable depth test so screen-space quad isn't discarded due to depth test.
@@ -343,7 +365,7 @@ int main()
         glBindVertexArray(quadVAO);
         glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
+        glEnable(GL_DEPTH_TEST);
         
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -495,4 +517,76 @@ unsigned int loadTexture(char const* path)
     }
 
     return textureID;
+}
+glm::vec3 getMinLightSource(Scene* scene) 
+{
+    int l = 0;
+    float distance = 0;
+    if (scene->level->lights[0]->type == 1)
+    {
+        PointLight* light = dynamic_cast<PointLight*>(scene->level->lights[0]);
+        if (light != nullptr)
+        {
+            distance = glm::distance(scene->level->character->box().max, light->position);
+        }
+    }
+    else if (scene->level->lights[0]->type == 2)
+    {
+        SpotLight* light = dynamic_cast<SpotLight*>(scene->level->lights[0]);
+        if (light != nullptr)
+        {
+            distance = glm::distance(scene->level->character->box().max, light->position);
+        }
+    }
+
+     
+    for (unsigned short i = 1; i < scene->level->lights.size(); i++)
+    {
+        float currDist = 0;
+        if (scene->level->lights[i]->type == 1)
+        {
+            PointLight* light = dynamic_cast<PointLight*>(scene->level->lights[i]);
+            if (light != nullptr)
+            {
+                currDist = glm::distance(scene->level->character->box().max, light->position);
+            }
+        }
+        else if (scene->level->lights[i]->type == 2)
+        {
+            SpotLight* light = dynamic_cast<SpotLight*>(scene->level->lights[i]);
+            if (light != nullptr)
+            {
+                currDist = glm::distance(scene->level->character->box().max, light->position);
+            }
+        }
+        if (abs(currDist) < abs(distance))
+        {
+            l = i;
+        }
+    }
+    LightIndex = l;
+    if (scene->level->lights[l]->type == 1)
+    {
+        PointLight* light = dynamic_cast<PointLight*>(scene->level->lights[l]);
+        if (light != nullptr)
+        {
+            return light->position;
+        }
+    }
+    else if (scene->level->lights[l]->type == 2)
+    {
+        SpotLight* light = dynamic_cast<SpotLight*>(scene->level->lights[l]);
+        if (light != nullptr)
+        {
+            return light->position;
+        }
+    }
+    else 
+    {
+        DirectionalLight* light = dynamic_cast<DirectionalLight*>(scene->level->lights[l]);
+        if (light != nullptr)
+        {
+            return glm::vec3(light->direction.x - 10000, light->direction.y - 10000, light->direction.z - 10000);
+        }
+    }
 }
